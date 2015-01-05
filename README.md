@@ -12,7 +12,7 @@ THIS HARDWARE AND SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EX
 
 ####Overview
 
-This project aims to emulate a coin line as required by the older "dumb" (ie, non-COCOT) payphones such as the Western Electric 1D "Fortress" series.  This coin line interface connects in between an Asterisk PBX the payphone.  It provide the coin control functionality as well as the ability to determine whether an initial rate has been deposited, and can also perform the "stuck coin" test.  In addition, it can count dial pulses to provide out-of-band dial signalling to Asterisk for the rotary-style 1D payphones.
+This project aims to emulate a coin line as required by the older "dumb" (ie, non-COCOT) payphones such as the Western Electric 1D "Fortress" series.  This coin line interface connects in between an Asterisk PBX and the payphone.  It provide the coin control functionality as well as the ability to determine whether an initial rate has been deposited, and can also perform the "stuck coin" test.  In addition, it can count dial pulses to provide out-of-band dial signalling to Asterisk for the rotary-style 1D payphones.
 
 This project is based on two other open-source projects (see References below) and has the following goals:
 
@@ -22,7 +22,7 @@ This project is based on two other open-source projects (see References below) a
 
 3. The ability to count dial pulses from Rotary payphones and provide the digits out-of-band to Asterisk.
 
-4. The ability to be red-boxed.
+4. The ability to be [red-boxed](http://en.wikipedia.org/wiki/Red_box_(phreaking\)).
 
 ####Pay Phone
 [![](http://i.imgur.com/b4mjclw.jpg)](http://imgur.com/b4mjclw.jpg)
@@ -32,13 +32,12 @@ The payphone is a standard Western Electric 1D phone with a 32B "dumb" chassis.
 ####Coin Line Signaling
 All coin line signaling happens with respect to TIP and Ground with the RING open. For the tests, current flowing when voltage is applied indicates that either a coin is present in the hopper, or the initial rate has been deposited.
 
-+130VDC: Collect coin.
-
--130VDC: Refund coin.
-
-+25VDC: Stuck Coin Test.
-
--25VDC: Initial Rate Test.
+|Voltage | Operation
+|--------|-----------
+|+130VDC | Collect coin.
+|-130VDC | Refund coin.
+|+25VDC  | Stuck Coin Test.
+|-25VDC  | Initial Rate Test.
 
 
 ####Controlling the Coin Line Signaling
@@ -80,3 +79,5 @@ The Asterisk AGI script is not complete, but at present it will prompt for money
 [https://github.com/jcs/payphone](https://github.com/jcs/payphone)
 
 [http://gpl-projects.ohnosec.org/payphone/](http://gpl-projects.ohnosec.org/payphone/)
+
+[Bell System Public Services Crafts' Manual for Station, Network, and Testboard](http://wedophones.com/TheBellSystem/pdf/bsp/coin/PublicServices1.pdf)
