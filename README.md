@@ -33,9 +33,13 @@ The payphone is a standard Western Electric 1D phone with a 32B "dumb" chassis.
 All coin line signaling happens with respect to TIP and Ground with the RING open. For the tests, current flowing when voltage is applied indicates that either a coin is present in the hopper, or the initial rate has been deposited.
 
 +130VDC: Collect coin.
+
 -130VDC: Refund coin.
+
 +25VDC: Stuck Coin Test.
+
 -25VDC: Initial Rate Test.
+
 
 ####Controlling the Coin Line Signaling
 [![](http://i.imgur.com/M2MgEFB.jpg)](http://imgur.com/M2MgEFB.jpg)
@@ -45,11 +49,13 @@ The coin line signaling is controlled via a Teensy 3.1 microcontroller.  This mi
 There are two relays that provide common control, and two additional relays per line.
 
 Common Control Relays:
+
 1. REFUND Relay: When operated will prepare negative voltage to be applied to the TIP when the selected line's COIN_CONTROL relay is operated.  When this relay is operated, either Coin Refund or Initial Rate Test will be performed based on the state of the DISPOSITION relay.
 
 2. DISPOSITION Relay: When operated will prepare high voltage (either +130VDC or -130VDC, repending on the state of the REFUND relay) to be applied to the TIP when the selected line's COIN_CONTROL relay is operated.  When the DISPOSITION relay is not operated, low voltage (+25VDC or -25VDC) will be applied in order to perform either the initial rate test or the stuck coin test.
 
 Per-Line Relays (one each per coin line:)
+
 1. HOLD Relay: When operated will shunt the TIP and RING towards the CO (Asterisk PBX in our case) with a 120-ohm resistor.  This will keep the line on hold while coin disposition or rate tests are performed.
 
 2. COIN_CONTROL Relay: When operated, will apply the coin control voltage to the TIP towards the payphone.  When not operated, the TIP and RING from the CO (Asterisk PBX) will be passed through to the payphone.
