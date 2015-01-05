@@ -1,0 +1,245 @@
+#!/usr/bin/perl
+
+use Asterisk::AGI;
+use Cwd "realpath";
+use File::Basename;
+use Time::HiRes;
+use strict;
+
+use constant {
+	# where we live
+	SOUND_DIR => dirname(realpath($0)),
+
+	# outbound context we'll send calls to (since our current context should
+	# only allow dialing 6200 from the ATA)
+	OUTBOUND_CONTEXT => "from-internal",
+#"payphone-outbound",
+
+	# timeout in seconds to wait to get a number or a coin
+	TIMEOUT => 10,
+
+	# timeout in seconds to wait to get a number or a coin
+	BUSY_TIMEOUT => 100,
+
+	# amount required to make a call
+	CALL_CENTS => 25,
+
+	# numbers allowed to be dialed without requiring coins
+	FREE_CALLS => qr/^(1?(8[02345678]{2})[0-9]{7}|911)/,
+
+	# valid numbers which will immediately dial instead of timing out
+	VALID_NUMBER => qr/^(1?[2-8][0-9]{9}|911|5556[0-9]{3}|[2-9][0-9]{6}|[2-9][0-9]{9})/,
+};
+
+my $AGI = new Asterisk::AGI;
+
+my $last_activity = time();
+my @last_coins;
+my $inserted = 0;
+my $dialed = "";
+
+$AGI->verbose("Entered payphone.agi");
+# generate dialtone while we wait for coins
+sleep (1);
+$AGI->stream_file(SOUND_DIR . "/crossbar_connect_sound", "0");
+$AGI->exec("Playtones", "dial");
+my $dialtone = 1;
+
+while (1) {
+	my $dig = $AGI->wait_for_digit(1000);
+
+	if ($dig >= 1) {
+		$AGI->verbose("Received " . $dig . " digits", 5);
+		if ($dig == ord('$')) {
+			# shift out old coins
+			my @new_coins;
+			for (my $x = 0; $x <= $#last_coins; $x++) {
+				if (Time::HiRes::time - $last_coins[$x] < 0.5) {
+					push(@new_coins, $last_coins[$x]);
+				}
+			}
+			@last_coins = @new_coins;
+
+			push(@last_coins, Time::HiRes::time);
+
+			# if we've heard 3 coin tones in close proximity, always count it
+			# as 5 since we might not hear the other 2
+			if ($#last_coins == 2) {
+				$inserted += 15;
+				$AGI->verbose("got 5-cent tone, counting as 15 cents (now "
+					. $inserted . " cents)", 5);
+			}
+			elsif ($#last_coins > 2) {
+				$AGI->verbose("ignoring 4th or 5th 5-cent tone of 25-cents "
+					. "(still " . $inserted . " cents)", 5);
+			}
+			else {
+				$inserted += 5;
+				$AGI->verbose("got 5-cent tone (now " . $inserted . " cents)",
+					5);
+			}
+		}
+		else {
+			if ($dialtone) {
+				$AGI->exec("StopPlaytones", "dial");
+				$dialtone = 0;
+			}
+
+			$dialed .= chr($dig);
+			$AGI->verbose("dialed " . chr($dig) . " (now " . $dialed . ")", 5);
+		}
+
+		$last_activity = time();
+	}
+
+	my $elapsed = time() - $last_activity;
+
+	if ($dialed =~ FREE_CALLS) {
+		$AGI->verbose("connecting to " . $dialed . " (free call)", 1);
+		dial($dialed);
+		exit;
+	}
+	elsif ($dialed =~ VALID_NUMBER) {
+		if ($inserted < CALL_CENTS) {
+			$AGI->verbose("need " . CALL_CENTS . " cents to dial " . $dialed
+				. ", have " . $inserted, 5);
+
+
+			while (1) {
+				if (play_wait_for_coin() == 1) {
+					exit;
+				}
+			}
+
+			$AGI->stream_file(SOUND_DIR . "/not_deposited", "0");
+			busy_hangup();
+			exit;
+		}
+		else {
+			$AGI->verbose("connecting to " . $dialed . " (inserted "
+				. $inserted . " cents)", 1);
+		$AGI->stream_file(SOUND_DIR . "/ACTS_Thank_You", "0");
+		$AGI->stream_file(SOUND_DIR . "/crossbar_connect_sound", "0");
+		$AGI->stream_file(SOUND_DIR . "/trunk_signal_mf", "0");
+			dial($dialed);
+		}
+		exit;
+	}
+	elsif ($elapsed >= TIMEOUT) {
+		$AGI->verbose("timed out waiting for coins or digits", 1);
+
+		if ($dialed ne "") {
+			$AGI->stream_file(SOUND_DIR . "/invalid_number", "0");
+		}
+
+		busy_hangup();
+		exit;
+	}
+}
+
+sub dial {
+	my ($number) = @_;
+
+	$AGI->stream_file(SOUND_DIR . "/crossbar_connect_sound", "0");
+	$AGI->set_context(OUTBOUND_CONTEXT);
+	$AGI->set_extension($dialed);
+	$AGI->exec("Goto", "1");
+}
+
+sub busy_hangup {
+	$AGI->stream_file(SOUND_DIR . "/crossbar_connect_sound", "0");
+	$AGI->stream_file(SOUND_DIR . "/mod_busy", "0");
+	$AGI->stream_file(SOUND_DIR . "/mod_busy", "0");
+	$AGI->stream_file(SOUND_DIR . "/crossbar_connect_sound", "0");
+	$AGI->set_extension("6200");
+	$AGI->exec("Goto", "1");
+}
+
+sub play_wait_for_coin {
+	my $remaining = CALL_CENTS - $inserted;
+
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Coin_Test", "\$") == ord('$')) {
+			$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_SBC_Operator_Assistance", "\$") == ord('$')) {
+			$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_" . $remaining) == ord('$')) {
+			$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Cents_Please", "\$") == ord('$')) {
+			$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Silence", "\$") == ord('$')) {
+			$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Please", "\$") == ord('$')) {
+			$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Deposit", "\$") == ord('$')) {
+			$inserted += 5;
+		} else {
+		$remaining = CALL_CENTS - $inserted;
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_" . $remaining) == ord('$')) {
+			$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Cents", "\$") == ord('$')) {
+               		$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_For_the_First", "\$") == ord('$')) {
+               		$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Three", "\$") == ord('$')) {
+       			$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Minutes", "\$") == ord('$')) {
+       			$inserted += 5;
+		} } } } } } } } } } }
+	}
+	
+	if ($inserted >= CALL_CENTS) {
+		$AGI->stream_file(SOUND_DIR . "/ACTS_Thank_You", "0");
+		dial($dialed);
+		return 1;
+	} else {
+		$last_activity = time();
+		if (wait_for_coins() == 1) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
+sub wait_for_coins {
+	while (1) {
+		my $dig = $AGI->wait_for_digit(1000);
+
+		if ($dig >= 1) {
+			$AGI->verbose("Received " . $dig . " digits", 5);
+			if ($dig == ord('$')) {
+				$inserted += 5;
+				$AGI->verbose("got 5-cent tone (now " . $inserted . " cents)", 5);
+				$last_activity = time();
+			}
+
+
+			if ($inserted >= CALL_CENTS) {
+				$AGI->stream_file(SOUND_DIR . "/ACTS_Thank_You", "0");
+				dial($dialed);
+				return 1;
+			}
+		}
+
+		my $elapsed = time() - $last_activity;
+
+		if ($elapsed >= TIMEOUT) {
+			$AGI->verbose("timed out waiting for coins or digits", 1);
+			if ($inserted < CALL_CENTS) {
+				$AGI->verbose("need " . CALL_CENTS . " cents to dial " . $dialed
+				. ", have " . $inserted, 5);
+			}
+			return 0;
+		}
+	}
+}
