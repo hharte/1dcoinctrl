@@ -12,7 +12,7 @@ THIS HARDWARE AND SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EX
 
 ####Overview
 
-This project aims to emulate a coin line as required by the older "dumb" (ie, non-COCOT) payphones such as the Western Electric 1D "Fortress" series.  This coin line interface connects in between an Asterisk PBX and the payphone.  It provide the coin control functionality as well as the ability to determine whether an initial rate has been deposited, and can also perform the "stuck coin" test.  In addition, it can count dial pulses to provide out-of-band dial signalling to Asterisk for the rotary-style 1D payphones.
+This project aims to emulate a coin line as required by the older "dumb" (ie, non-COCOT) payphones such as the Western Electric 1D "Fortress" series.  This coin line interface connects in between an Asterisk PBX and the payphone.  It provide the coin control functionality as well as the ability to determine whether an initial rate has been deposited, and can also perform the "stuck coin" test.  In addition, it can count dial pulses to provide out-of-band dial signalling to Asterisk for the rotary-style 1D1 payphones.
 
 This project is based on two other open-source projects (see References below) and has the following goals:
 
@@ -22,7 +22,7 @@ This project is based on two other open-source projects (see References below) a
 
 3. The ability to count dial pulses from Rotary payphones and provide the digits out-of-band to Asterisk.
 
-4. The ability to be [red-boxed](http://en.wikipedia.org/wiki/Red_box_(phreaking\)).
+4. The ability to be [red-boxed](http://en.wikipedia.org/wiki/Red_box_(phreaking)).
 
 ####Pay Phone
 [![](http://i.imgur.com/b4mjclw.jpg)](http://imgur.com/b4mjclw.jpg)
@@ -43,7 +43,7 @@ All coin line signaling happens with respect to TIP and Ground with the RING ope
 ####Controlling the Coin Line Signaling
 [![](http://i.imgur.com/M2MgEFB.jpg)](http://imgur.com/M2MgEFB.jpg)
 
-The coin line signaling is controlled via a Teensy 3.1 microcontroller.  This microcontroller can sense the line ON/OFF hook status, the test status, and can control the relays on the controller.
+The coin line signaling is controlled via a [Teensy 3.1 microcontroller](https://www.pjrc.com/teensy/teensy31.html).  This microcontroller can sense the line ON/OFF hook status, the test status, and can control the relays on the controller.
 
 There are two relays that provide common control, and two additional relays per line.
 
@@ -71,7 +71,7 @@ The microcontroller firmware is written in the C programming language, and curre
 The firmware follows Karl Lunt's [Bare-metal Teensy 3.x Development](http://www.seanet.com/~karllunt/bareteensy31.html) and also uses his [UART and Terminal I/O libraries](http://www.seanet.com/~karllunt/bareteensy31libs.html).
 
 ####Asterisk PBX Modifications
-Modifications to Asterisk in order to recognize the 1700/2200Hz coin tones is based on [Joshua Stein's project](https://github.com/jcs/payphone) although I modified them to treat the 1700/2200Hz tones as a 5th row/column in the standard DTMF decoding routine in Asterisk's main/dsp.c.
+Modifications to Asterisk in order to recognize the 1700/2200Hz coin tones is based on [Joshua Stein's project](https://github.com/jcs/payphone) although I modified them to treat the 1700/2200Hz tones as a 5th row/column in the standard [DTMF](http://en.wikipedia.org/wiki/Dual-tone_multi-frequency_signaling) decoding routine in Asterisk's main/dsp.c.
 
 The Asterisk AGI script is not complete, but at present it will prompt for money and can recognize the coin tones.  It will complete the call after 25 cents has been deposited.
 
