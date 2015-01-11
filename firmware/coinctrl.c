@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * $Id: coinctrl.c 2594 2015-01-04 21:05:34Z hharte $                    *
+ * $Id: coinctrl.c 2597 2015-01-11 18:32:58Z hharte $                    *
  *                                                                       *
  * Copyright (c) 2015 Howard M. Harte, WZ2Q.                             *
  * http://www.magicandroidapps.com                                       *
@@ -195,20 +195,20 @@ void run_tests(void)
 	int line;
 	for (line = 1; line <= 4; line++) {
 		xprintf("\n\n\n\rTesting Line %d\n\r", line);
-		xprintf("Line %d is %s hook.\n\r", line, read_hook_state(1) ? "OFF" : "on");
+		xprintf("Line %d is %s hook.\n\r", line, read_hook_state(line) ? "OFF" : "on");
 		test_coin(line, STUCK_COIN);
 		collect_coin(line, REFUND);
 		collect_coin(line, COLLECT);
 		test_coin(line, INITIAL_RATE);
-		xprintf("Line %d is %s hook.\n\r", line, read_hook_state(1) ? "OFF" : "on");
+		xprintf("Line %d is %s hook.\n\r", line, read_hook_state(line) ? "OFF" : "on");
 	}
 }
 
 /* Collect or refund the coin in the hopper. */
 void collect_coin(int line, int collect)
 {
-	/* Put line on hold. */
-	set_line_hold(line, TRUE);
+	/* Put line on hold if it is off hook. */
+	if (read_hook_state(line) == OFF_HOOK) set_line_hold(line, TRUE);
 
 	/* Set REFUND relay off */
 	if (collect) {
@@ -243,8 +243,8 @@ void test_coin(int line, int initial_rate)
 {
 	volatile uint32_t n;
 
-	/* Put line on hold. */
-	set_line_hold(line, TRUE);
+	/* Put line on hold if it is off hook. */
+	if (read_hook_state(line) == OFF_HOOK) set_line_hold(line, TRUE);
 
 	/* Set REFUND relay */
 	if (initial_rate) {
