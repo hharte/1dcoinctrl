@@ -27,7 +27,7 @@ This project is based on two other open-source projects (see References below) a
 ####Pay Phone
 [![](http://i.imgur.com/b4mjclw.jpg)](http://imgur.com/b4mjclw.jpg)
 
-The payphone is a standard Western Electric 1D phone with a 32B "dumb" chassis.
+The payphone is a standard Western Electric 1D phone with a 32B "dumb" chassis.  I also verified that Western Electric 32A and TeleService 4032C chassis works well with this design.
 
 ####Coin Line Signaling
 All coin line signaling happens with respect to TIP and Ground with the RING open. For the tests, current flowing when voltage is applied indicates that either a coin is present in the hopper, or the initial rate has been deposited.
