@@ -5,6 +5,7 @@ use Cwd "realpath";
 use File::Basename;
 use Time::HiRes;
 use strict;
+$|=1;
 
 use constant {
 	# where we live
@@ -104,6 +105,12 @@ while (1) {
 			$AGI->verbose("need " . CALL_CENTS . " cents to dial " . $dialed
 				. ", have " . $inserted, 5);
 
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Coin_Test", "\$") == ord('$')) {
+			$inserted += 5;
+		} else {
+		if ($AGI->stream_file(SOUND_DIR . "/ACTS_SBC_Operator_Assistance", "\$") == ord('$')) {
+			$inserted += 5;
+		} }
 
 			while (1) {
 				if (play_wait_for_coin() == 1) {
@@ -118,7 +125,7 @@ while (1) {
 		else {
 			$AGI->verbose("connecting to " . $dialed . " (inserted "
 				. $inserted . " cents)", 1);
-		$AGI->stream_file(SOUND_DIR . "/ACTS_Thank_You", "0");
+		$AGI->stream_file("thank-you", "0");
 		$AGI->stream_file(SOUND_DIR . "/crossbar_connect_sound", "0");
 		$AGI->stream_file(SOUND_DIR . "/trunk_signal_mf", "0");
 			dial($dialed);
@@ -158,47 +165,38 @@ sub busy_hangup {
 sub play_wait_for_coin {
 	my $remaining = CALL_CENTS - $inserted;
 
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Coin_Test", "\$") == ord('$')) {
+		if ($AGI->say_number($remaining, "\$") == ord('$')) {
 			$inserted += 5;
 		} else {
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_SBC_Operator_Assistance", "\$") == ord('$')) {
-			$inserted += 5;
-		} else {
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_" . $remaining) == ord('$')) {
-			$inserted += 5;
-		} else {
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Cents_Please", "\$") == ord('$')) {
+		if ($AGI->stream_file("cents-please", "\$") == ord('$')) {
 			$inserted += 5;
 		} else {
 		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Silence", "\$") == ord('$')) {
 			$inserted += 5;
 		} else {
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Please", "\$") == ord('$')) {
-			$inserted += 5;
-		} else {
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Deposit", "\$") == ord('$')) {
+		if ($AGI->stream_file("please-deposit", "\$") == ord('$')) {
 			$inserted += 5;
 		} else {
 		$remaining = CALL_CENTS - $inserted;
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_" . $remaining) == ord('$')) {
+		if ($AGI->say_number($remaining, "\$") == ord('$')) {
 			$inserted += 5;
 		} else {
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Cents", "\$") == ord('$')) {
+		if ($AGI->stream_file("cents", "\$") == ord('$')) {
                		$inserted += 5;
 		} else {
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_For_the_First", "\$") == ord('$')) {
+		if ($AGI->stream_file("for-the-first", "\$") == ord('$')) {
                		$inserted += 5;
 		} else {
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Three", "\$") == ord('$')) {
+		if ($AGI->say_number(3, "\$") == ord('$')) {
        			$inserted += 5;
 		} else {
-		if ($AGI->stream_file(SOUND_DIR . "/ACTS_Minutes", "\$") == ord('$')) {
+		if ($AGI->stream_file("minutes", "\$") == ord('$')) {
        			$inserted += 5;
-		} } } } } } } } } } }
+		} } } } } } } }
 	}
 	
 	if ($inserted >= CALL_CENTS) {
-		$AGI->stream_file(SOUND_DIR . "/ACTS_Thank_You", "0");
+		$AGI->stream_file("thank-you", "0");
 		dial($dialed);
 		return 1;
 	} else {
@@ -225,7 +223,7 @@ sub wait_for_coins {
 
 
 			if ($inserted >= CALL_CENTS) {
-				$AGI->stream_file(SOUND_DIR . "/ACTS_Thank_You", "0");
+				$AGI->stream_file("thank-you", "0");
 				dial($dialed);
 				return 1;
 			}
