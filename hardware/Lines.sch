@@ -36,29 +36,6 @@ F 12 "Active" H 3050 3500 60  0001 L CNN "Status"
 	1    2850 2300
 	0    1    -1   0   
 $EndComp
-$Comp
-L Isolator:H11AA1 U?
-U 1 1 5BAA6BC5
-P 1900 1500
-AR Path="/5BAA6BC5" Ref="U?"  Part="1" 
-AR Path="/5BA4B80D/5BAA6BC5" Ref="U?"  Part="1" 
-AR Path="/5BAA648F/5BAA6BC5" Ref="U7"  Part="1" 
-F 0 "U7" H 1900 1847 60  0000 C CNN
-F 1 "H11AA1" H 1900 1741 60  0000 C CNN
-F 2 "Package_DIP:DIP-6_W7.62mm" H 2100 1700 60  0001 L CNN
-F 3 "http://www.onsemi.com/pub/Collateral/H11AA4M-D.pdf" H 2100 1800 60  0001 L CNN
-F 4 "H11AA1M-ND" H 2100 1900 60  0001 L CNN "Digi-Key_PN"
-F 5 "H11AA1" H 2100 2000 60  0001 L CNN "MPN"
-F 6 "Isolators" H 2100 2100 60  0001 L CNN "Category"
-F 7 "Optoisolators - Transistor, Photovoltaic Output" H 2100 2200 60  0001 L CNN "Family"
-F 8 "http://www.onsemi.com/pub/Collateral/H11AA4M-D.pdf" H 2100 2300 60  0001 L CNN "DK_Datasheet_Link"
-F 9 "https://www.digikey.com/product-detail/en/on-semiconductor/H11AA1M/H11AA1M-ND/1053602" H 2100 2400 60  0001 L CNN "DK_Detail_Page"
-F 10 "OPTOISO 4.17KV TRANS W/BASE 6DIP" H 2100 2500 60  0001 L CNN "Description"
-F 11 "ON Semiconductor" H 2100 2600 60  0001 L CNN "Manufacturer"
-F 12 "Active" H 2100 2700 60  0001 L CNN "Status"
-	1    1900 1500
-	-1   0    0    -1  
-$EndComp
 Text HLabel 1400 2000 0    50   UnSpc ~ 0
 L1_CO_TIP
 Text HLabel 1400 2400 0    50   UnSpc ~ 0
@@ -164,27 +141,20 @@ Wire Wire Line
 $Comp
 L power:GND #PWR?
 U 1 1 5BAA6C1D
-P 1450 1700
+P 1600 1700
 AR Path="/5BA4B80D/5BAA6C1D" Ref="#PWR?"  Part="1" 
 AR Path="/5BAA648F/5BAA6C1D" Ref="#PWR032"  Part="1" 
-F 0 "#PWR032" H 1450 1450 50  0001 C CNN
-F 1 "GND" H 1455 1527 50  0000 C CNN
-F 2 "" H 1450 1700 50  0001 C CNN
-F 3 "" H 1450 1700 50  0001 C CNN
-	1    1450 1700
+F 0 "#PWR032" H 1600 1450 50  0001 C CNN
+F 1 "GND" H 1605 1527 50  0000 C CNN
+F 2 "" H 1600 1700 50  0001 C CNN
+F 3 "" H 1600 1700 50  0001 C CNN
+	1    1600 1700
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	1450 1700 1450 1600
-Wire Wire Line
-	1450 1600 1600 1600
-Text HLabel 1350 1500 0    50   Output ~ 0
-L1_OFF_HOOK_N
-Wire Wire Line
-	1350 1500 1500 1500
+Text HLabel 1350 1400 0    50   Output ~ 0
+L1_OFF_HOOK_F
 Wire Wire Line
 	4700 2000 5000 2000
-NoConn ~ 1600 1400
 $Comp
 L Device:R_US R8
 U 1 1 5BAAA638
@@ -210,63 +180,7 @@ Wire Wire Line
 	3750 2100 3750 3700
 NoConn ~ 4100 2500
 Wire Wire Line
-	2200 1600 2300 1600
-Wire Wire Line
-	2300 1600 2300 2000
-Wire Wire Line
-	2300 2000 1400 2000
-Wire Wire Line
-	2200 1400 2400 1400
-Wire Wire Line
-	2400 1400 2400 2000
-Wire Wire Line
-	2400 2000 2550 2000
-$Comp
-L Device:R_US R6
-U 1 1 5BAB9452
-P 1750 900
-F 0 "R6" V 1545 900 50  0000 C CNN
-F 1 "220" V 1636 900 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 1790 890 50  0001 C CNN
-F 3 "~" H 1750 900 50  0001 C CNN
-	1    1750 900 
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:LED D6
-U 1 1 5BAB9516
-P 1500 1150
-F 0 "D6" V 1538 1033 50  0000 R CNN
-F 1 "LED" V 1447 1033 50  0000 R CNN
-F 2 "LED_THT:LED_D5.0mm" H 1500 1150 50  0001 C CNN
-F 3 "~" H 1500 1150 50  0001 C CNN
-	1    1500 1150
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	1500 1500 1500 1300
-Connection ~ 1500 1500
-Wire Wire Line
-	1500 1500 1600 1500
-Wire Wire Line
-	1500 1000 1500 900 
-Wire Wire Line
-	1500 900  1600 900 
-$Comp
-L power:+5V #PWR034
-U 1 1 5BAC3C63
-P 1950 850
-F 0 "#PWR034" H 1950 700 50  0001 C CNN
-F 1 "+5V" H 1965 1023 50  0000 C CNN
-F 2 "" H 1950 850 50  0001 C CNN
-F 3 "" H 1950 850 50  0001 C CNN
-	1    1950 850 
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	1900 900  1950 900 
-Wire Wire Line
-	1950 900  1950 850 
+	2150 2000 2100 2000
 Wire Wire Line
 	3300 2900 3500 2900
 Wire Wire Line
@@ -308,29 +222,6 @@ F 11 "Omron Electronics Inc-EMC Div" H 7800 3400 60  0001 L CNN "Manufacturer"
 F 12 "Active" H 7800 3500 60  0001 L CNN "Status"
 	1    7600 2300
 	0    1    -1   0   
-$EndComp
-$Comp
-L Isolator:H11AA1 U?
-U 1 1 5BADEBCD
-P 6650 1500
-AR Path="/5BADEBCD" Ref="U?"  Part="1" 
-AR Path="/5BA4B80D/5BADEBCD" Ref="U?"  Part="1" 
-AR Path="/5BAA648F/5BADEBCD" Ref="U9"  Part="1" 
-F 0 "U9" H 6650 1847 60  0000 C CNN
-F 1 "H11AA1" H 6650 1741 60  0000 C CNN
-F 2 "Package_DIP:DIP-6_W7.62mm" H 6850 1700 60  0001 L CNN
-F 3 "http://www.onsemi.com/pub/Collateral/H11AA4M-D.pdf" H 6850 1800 60  0001 L CNN
-F 4 "H11AA1M-ND" H 6850 1900 60  0001 L CNN "Digi-Key_PN"
-F 5 "H11AA1" H 6850 2000 60  0001 L CNN "MPN"
-F 6 "Isolators" H 6850 2100 60  0001 L CNN "Category"
-F 7 "Optoisolators - Transistor, Photovoltaic Output" H 6850 2200 60  0001 L CNN "Family"
-F 8 "http://www.onsemi.com/pub/Collateral/H11AA4M-D.pdf" H 6850 2300 60  0001 L CNN "DK_Datasheet_Link"
-F 9 "https://www.digikey.com/product-detail/en/on-semiconductor/H11AA1M/H11AA1M-ND/1053602" H 6850 2400 60  0001 L CNN "DK_Detail_Page"
-F 10 "OPTOISO 4.17KV TRANS W/BASE 6DIP" H 6850 2500 60  0001 L CNN "Description"
-F 11 "ON Semiconductor" H 6850 2600 60  0001 L CNN "Manufacturer"
-F 12 "Active" H 6850 2700 60  0001 L CNN "Status"
-	1    6650 1500
-	-1   0    0    -1  
 $EndComp
 Text HLabel 6150 2000 0    50   UnSpc ~ 0
 L2_CO_TIP
@@ -434,30 +325,8 @@ F 3 "http://www.nxp.com/documents/data_sheet/1N4148_1N4448.pdf" H 9150 3250 50  
 $EndComp
 Wire Wire Line
 	8850 1900 7900 1900
-$Comp
-L power:GND #PWR?
-U 1 1 5BADEC11
-P 6200 1700
-AR Path="/5BA4B80D/5BADEC11" Ref="#PWR?"  Part="1" 
-AR Path="/5BAA648F/5BADEC11" Ref="#PWR040"  Part="1" 
-F 0 "#PWR040" H 6200 1450 50  0001 C CNN
-F 1 "GND" H 6205 1527 50  0000 C CNN
-F 2 "" H 6200 1700 50  0001 C CNN
-F 3 "" H 6200 1700 50  0001 C CNN
-	1    6200 1700
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	6200 1700 6200 1600
-Wire Wire Line
-	6200 1600 6350 1600
-Text HLabel 6100 1500 0    50   Output ~ 0
-L2_OFF_HOOK_N
-Wire Wire Line
-	6100 1500 6250 1500
 Wire Wire Line
 	9450 2000 9850 2000
-NoConn ~ 6350 1400
 $Comp
 L Device:R_US R12
 U 1 1 5BADEC1D
@@ -480,64 +349,6 @@ Wire Wire Line
 Wire Wire Line
 	8500 2100 8500 3700
 NoConn ~ 8850 2500
-Wire Wire Line
-	6950 1600 7050 1600
-Wire Wire Line
-	7050 1600 7050 2000
-Wire Wire Line
-	7050 2000 6150 2000
-Wire Wire Line
-	6950 1400 7150 1400
-Wire Wire Line
-	7150 1400 7150 2000
-Wire Wire Line
-	7150 2000 7300 2000
-$Comp
-L Device:R_US R10
-U 1 1 5BADEC32
-P 6500 900
-F 0 "R10" V 6295 900 50  0000 C CNN
-F 1 "220" V 6386 900 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 6540 890 50  0001 C CNN
-F 3 "~" H 6500 900 50  0001 C CNN
-	1    6500 900 
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:LED D12
-U 1 1 5BADEC39
-P 6250 1150
-F 0 "D12" V 6288 1033 50  0000 R CNN
-F 1 "LED" V 6197 1033 50  0000 R CNN
-F 2 "LED_THT:LED_D5.0mm" H 6250 1150 50  0001 C CNN
-F 3 "~" H 6250 1150 50  0001 C CNN
-	1    6250 1150
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	6250 1500 6250 1300
-Connection ~ 6250 1500
-Wire Wire Line
-	6250 1500 6350 1500
-Wire Wire Line
-	6250 1000 6250 900 
-Wire Wire Line
-	6250 900  6350 900 
-$Comp
-L power:+5V #PWR042
-U 1 1 5BADEC45
-P 6700 850
-F 0 "#PWR042" H 6700 700 50  0001 C CNN
-F 1 "+5V" H 6715 1023 50  0000 C CNN
-F 2 "" H 6700 850 50  0001 C CNN
-F 3 "" H 6700 850 50  0001 C CNN
-	1    6700 850 
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	6650 900  6700 900 
-Wire Wire Line
-	6700 900  6700 850 
 Wire Wire Line
 	8050 2900 8250 2900
 Wire Wire Line
@@ -580,29 +391,6 @@ F 11 "Omron Electronics Inc-EMC Div" H 3050 6400 60  0001 L CNN "Manufacturer"
 F 12 "Active" H 3050 6500 60  0001 L CNN "Status"
 	1    2850 5300
 	0    1    -1   0   
-$EndComp
-$Comp
-L Isolator:H11AA1 U?
-U 1 1 5BAE9B74
-P 1900 4500
-AR Path="/5BAE9B74" Ref="U?"  Part="1" 
-AR Path="/5BA4B80D/5BAE9B74" Ref="U?"  Part="1" 
-AR Path="/5BAA648F/5BAE9B74" Ref="U8"  Part="1" 
-F 0 "U8" H 1900 4847 60  0000 C CNN
-F 1 "H11AA1" H 1900 4741 60  0000 C CNN
-F 2 "Package_DIP:DIP-6_W7.62mm" H 2100 4700 60  0001 L CNN
-F 3 "http://www.onsemi.com/pub/Collateral/H11AA4M-D.pdf" H 2100 4800 60  0001 L CNN
-F 4 "H11AA1M-ND" H 2100 4900 60  0001 L CNN "Digi-Key_PN"
-F 5 "H11AA1" H 2100 5000 60  0001 L CNN "MPN"
-F 6 "Isolators" H 2100 5100 60  0001 L CNN "Category"
-F 7 "Optoisolators - Transistor, Photovoltaic Output" H 2100 5200 60  0001 L CNN "Family"
-F 8 "http://www.onsemi.com/pub/Collateral/H11AA4M-D.pdf" H 2100 5300 60  0001 L CNN "DK_Datasheet_Link"
-F 9 "https://www.digikey.com/product-detail/en/on-semiconductor/H11AA1M/H11AA1M-ND/1053602" H 2100 5400 60  0001 L CNN "DK_Detail_Page"
-F 10 "OPTOISO 4.17KV TRANS W/BASE 6DIP" H 2100 5500 60  0001 L CNN "Description"
-F 11 "ON Semiconductor" H 2100 5600 60  0001 L CNN "Manufacturer"
-F 12 "Active" H 2100 5700 60  0001 L CNN "Status"
-	1    1900 4500
-	-1   0    0    -1  
 $EndComp
 Text HLabel 1400 5000 0    50   UnSpc ~ 0
 L3_CO_TIP
@@ -708,30 +496,8 @@ Wire Wire Line
 	4850 6250 4850 5700
 Wire Wire Line
 	4100 4900 3150 4900
-$Comp
-L power:GND #PWR?
-U 1 1 5BAE9BB4
-P 1450 4700
-AR Path="/5BA4B80D/5BAE9BB4" Ref="#PWR?"  Part="1" 
-AR Path="/5BAA648F/5BAE9BB4" Ref="#PWR033"  Part="1" 
-F 0 "#PWR033" H 1450 4450 50  0001 C CNN
-F 1 "GND" H 1455 4527 50  0000 C CNN
-F 2 "" H 1450 4700 50  0001 C CNN
-F 3 "" H 1450 4700 50  0001 C CNN
-	1    1450 4700
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	1450 4700 1450 4600
-Wire Wire Line
-	1450 4600 1600 4600
-Text HLabel 1350 4500 0    50   Output ~ 0
-L3_OFF_HOOK_N
-Wire Wire Line
-	1350 4500 1500 4500
 Wire Wire Line
 	4700 5000 5000 5000
-NoConn ~ 1600 4400
 $Comp
 L Device:R_US R9
 U 1 1 5BAE9BC0
@@ -752,64 +518,6 @@ L3_COIN_RING
 Wire Wire Line
 	4700 5400 5000 5400
 NoConn ~ 4100 5500
-Wire Wire Line
-	2200 4600 2300 4600
-Wire Wire Line
-	2300 4600 2300 5000
-Wire Wire Line
-	2300 5000 1400 5000
-Wire Wire Line
-	2200 4400 2400 4400
-Wire Wire Line
-	2400 4400 2400 5000
-Wire Wire Line
-	2400 5000 2550 5000
-$Comp
-L Device:R_US R7
-U 1 1 5BAE9BD4
-P 1750 3900
-F 0 "R7" V 1545 3900 50  0000 C CNN
-F 1 "220" V 1636 3900 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 1790 3890 50  0001 C CNN
-F 3 "~" H 1750 3900 50  0001 C CNN
-	1    1750 3900
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:LED D7
-U 1 1 5BAE9BDA
-P 1500 4150
-F 0 "D7" V 1538 4033 50  0000 R CNN
-F 1 "LED" V 1447 4033 50  0000 R CNN
-F 2 "LED_THT:LED_D5.0mm" H 1500 4150 50  0001 C CNN
-F 3 "~" H 1500 4150 50  0001 C CNN
-	1    1500 4150
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	1500 4500 1500 4300
-Connection ~ 1500 4500
-Wire Wire Line
-	1500 4500 1600 4500
-Wire Wire Line
-	1500 4000 1500 3900
-Wire Wire Line
-	1500 3900 1600 3900
-$Comp
-L power:+5V #PWR035
-U 1 1 5BAE9BE5
-P 1950 3850
-F 0 "#PWR035" H 1950 3700 50  0001 C CNN
-F 1 "+5V" H 1965 4023 50  0000 C CNN
-F 2 "" H 1950 3850 50  0001 C CNN
-F 3 "" H 1950 3850 50  0001 C CNN
-	1    1950 3850
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	1900 3900 1950 3900
-Wire Wire Line
-	1950 3900 1950 3850
 Wire Wire Line
 	3300 5900 3500 5900
 Wire Wire Line
@@ -853,29 +561,6 @@ F 11 "Omron Electronics Inc-EMC Div" H 7800 6400 60  0001 L CNN "Manufacturer"
 F 12 "Active" H 7800 6500 60  0001 L CNN "Status"
 	1    7600 5300
 	0    1    -1   0   
-$EndComp
-$Comp
-L Isolator:H11AA1 U?
-U 1 1 5BAE9C15
-P 6650 4500
-AR Path="/5BAE9C15" Ref="U?"  Part="1" 
-AR Path="/5BA4B80D/5BAE9C15" Ref="U?"  Part="1" 
-AR Path="/5BAA648F/5BAE9C15" Ref="U10"  Part="1" 
-F 0 "U10" H 6650 4847 60  0000 C CNN
-F 1 "H11AA1" H 6650 4741 60  0000 C CNN
-F 2 "Package_DIP:DIP-6_W7.62mm" H 6850 4700 60  0001 L CNN
-F 3 "http://www.onsemi.com/pub/Collateral/H11AA4M-D.pdf" H 6850 4800 60  0001 L CNN
-F 4 "H11AA1M-ND" H 6850 4900 60  0001 L CNN "Digi-Key_PN"
-F 5 "H11AA1" H 6850 5000 60  0001 L CNN "MPN"
-F 6 "Isolators" H 6850 5100 60  0001 L CNN "Category"
-F 7 "Optoisolators - Transistor, Photovoltaic Output" H 6850 5200 60  0001 L CNN "Family"
-F 8 "http://www.onsemi.com/pub/Collateral/H11AA4M-D.pdf" H 6850 5300 60  0001 L CNN "DK_Datasheet_Link"
-F 9 "https://www.digikey.com/product-detail/en/on-semiconductor/H11AA1M/H11AA1M-ND/1053602" H 6850 5400 60  0001 L CNN "DK_Detail_Page"
-F 10 "OPTOISO 4.17KV TRANS W/BASE 6DIP" H 6850 5500 60  0001 L CNN "Description"
-F 11 "ON Semiconductor" H 6850 5600 60  0001 L CNN "Manufacturer"
-F 12 "Active" H 6850 5700 60  0001 L CNN "Status"
-	1    6650 4500
-	-1   0    0    -1  
 $EndComp
 Text HLabel 6150 5000 0    50   UnSpc ~ 0
 L4_CO_TIP
@@ -983,30 +668,8 @@ Wire Wire Line
 	8750 6250 8750 5700
 Wire Wire Line
 	8850 4900 7900 4900
-$Comp
-L power:GND #PWR?
-U 1 1 5BAE9C55
-P 6200 4700
-AR Path="/5BA4B80D/5BAE9C55" Ref="#PWR?"  Part="1" 
-AR Path="/5BAA648F/5BAE9C55" Ref="#PWR041"  Part="1" 
-F 0 "#PWR041" H 6200 4450 50  0001 C CNN
-F 1 "GND" H 6205 4527 50  0000 C CNN
-F 2 "" H 6200 4700 50  0001 C CNN
-F 3 "" H 6200 4700 50  0001 C CNN
-	1    6200 4700
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	6200 4700 6200 4600
-Wire Wire Line
-	6200 4600 6350 4600
-Text HLabel 6100 4500 0    50   Output ~ 0
-L4_OFF_HOOK_N
-Wire Wire Line
-	6100 4500 6250 4500
 Wire Wire Line
 	9450 5000 9850 5000
-NoConn ~ 6350 4400
 $Comp
 L Device:R_US R15
 U 1 1 5BAE9C61
@@ -1027,64 +690,6 @@ L4_COIN_RING
 Wire Wire Line
 	9450 5400 9850 5400
 NoConn ~ 8850 5500
-Wire Wire Line
-	6950 4600 7050 4600
-Wire Wire Line
-	7050 4600 7050 5000
-Wire Wire Line
-	7050 5000 6150 5000
-Wire Wire Line
-	6950 4400 7150 4400
-Wire Wire Line
-	7150 4400 7150 5000
-Wire Wire Line
-	7150 5000 7300 5000
-$Comp
-L Device:R_US R11
-U 1 1 5BAE9C74
-P 6500 3900
-F 0 "R11" V 6400 3900 50  0000 C CNN
-F 1 "220" V 6600 3900 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 6540 3890 50  0001 C CNN
-F 3 "~" H 6500 3900 50  0001 C CNN
-	1    6500 3900
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:LED D13
-U 1 1 5BAE9C7A
-P 6250 4150
-F 0 "D13" V 6288 4033 50  0000 R CNN
-F 1 "LED" V 6197 4033 50  0000 R CNN
-F 2 "LED_THT:LED_D5.0mm" H 6250 4150 50  0001 C CNN
-F 3 "~" H 6250 4150 50  0001 C CNN
-	1    6250 4150
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	6250 4500 6250 4300
-Connection ~ 6250 4500
-Wire Wire Line
-	6250 4500 6350 4500
-Wire Wire Line
-	6250 4000 6250 3900
-Wire Wire Line
-	6250 3900 6350 3900
-$Comp
-L power:+5V #PWR043
-U 1 1 5BAE9C85
-P 6700 3850
-F 0 "#PWR043" H 6700 3700 50  0001 C CNN
-F 1 "+5V" H 6715 4023 50  0000 C CNN
-F 2 "" H 6700 3850 50  0001 C CNN
-F 3 "" H 6700 3850 50  0001 C CNN
-	1    6700 3850
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	6650 3900 6700 3900
-Wire Wire Line
-	6700 3900 6700 3850
 Wire Wire Line
 	8050 5900 8250 5900
 Wire Wire Line
@@ -1179,12 +784,375 @@ Wire Wire Line
 Connection ~ 8750 5700
 Text Notes 7000 6900 0    197  Italic 39
 1D Coin Controller
-Text Notes 7050 7050 0    50   Italic 10
-(c) 2020, Howard M. Harte - WZ2Q
+Text Notes 7050 7100 0    50   Italic 10
+(c) 2020, Howard M. Harte - WZ2Q\nhttps://github.com/hharte/1dcoinctrl
 Text Notes 10550 7650 0    50   ~ 0
-1
+2
 Text Notes 7400 7500 0    50   ~ 0
 1D Coin Controller - Coin Line Control
 Text Notes 8150 7650 0    50   ~ 0
-2020-06-06
+2020-06-27
+$Comp
+L Isolator:ILD74 U7
+U 1 1 5EF649BB
+P 2000 950
+F 0 "U7" H 2000 1275 50  0000 C CNN
+F 1 "ILD74" H 2000 1184 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W7.62mm_Socket" H 1800 750 50  0001 L CIN
+F 3 "https://www.vishay.com/docs/83640/ild74.pdf" H 2000 950 50  0001 L CNN
+	1    2000 950 
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Isolator:ILD74 U7
+U 2 1 5EF652BA
+P 2000 1500
+F 0 "U7" H 2000 1825 50  0000 C CNN
+F 1 "ILD74" H 2000 1734 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W7.62mm_Socket" H 1800 1300 50  0001 L CIN
+F 3 "https://www.vishay.com/docs/83640/ild74.pdf" H 2000 1500 50  0001 L CNN
+	2    2000 1500
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	2300 1400 2400 1400
+Wire Wire Line
+	2400 1400 2400 1050
+Wire Wire Line
+	2400 1050 2300 1050
+Wire Wire Line
+	1600 1050 1700 1050
+$Comp
+L Device:R_US R6
+U 1 1 5EF99E9D
+P 2300 2000
+F 0 "R6" V 2095 2000 50  0000 C CNN
+F 1 "120" V 2186 2000 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 2340 1990 50  0001 C CNN
+F 3 "~" H 2300 2000 50  0001 C CNN
+	1    2300 2000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2450 2000 2500 2000
+Wire Wire Line
+	1600 1700 1600 1600
+Wire Wire Line
+	1600 1600 1600 1050
+Connection ~ 1600 1600
+Wire Wire Line
+	1600 1600 1700 1600
+Text HLabel 1350 850  0    50   Output ~ 0
+L1_OFF_HOOK_R
+Wire Wire Line
+	1700 1400 1350 1400
+Wire Wire Line
+	1700 850  1350 850 
+Wire Wire Line
+	2500 2000 2500 1600
+Connection ~ 2500 2000
+Wire Wire Line
+	2500 2000 2550 2000
+Wire Wire Line
+	2500 1600 2300 1600
+Wire Wire Line
+	2500 1600 2500 850 
+Wire Wire Line
+	2500 850  2300 850 
+Connection ~ 2500 1600
+Wire Wire Line
+	2400 1400 2400 1750
+Wire Wire Line
+	2400 1750 2100 1750
+Wire Wire Line
+	2100 1750 2100 2000
+Connection ~ 2400 1400
+Connection ~ 2100 2000
+Wire Wire Line
+	2100 2000 1400 2000
+$Comp
+L power:GND #PWR?
+U 1 1 5F0821BC
+P 6350 1700
+AR Path="/5BA4B80D/5F0821BC" Ref="#PWR?"  Part="1" 
+AR Path="/5BAA648F/5F0821BC" Ref="#PWR0121"  Part="1" 
+F 0 "#PWR0121" H 6350 1450 50  0001 C CNN
+F 1 "GND" H 6355 1527 50  0000 C CNN
+F 2 "" H 6350 1700 50  0001 C CNN
+F 3 "" H 6350 1700 50  0001 C CNN
+	1    6350 1700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6900 2000 6850 2000
+$Comp
+L Isolator:ILD74 U9
+U 1 1 5F0821C3
+P 6750 950
+F 0 "U9" H 6750 1275 50  0000 C CNN
+F 1 "ILD74" H 6750 1184 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W7.62mm_Socket" H 6550 750 50  0001 L CIN
+F 3 "https://www.vishay.com/docs/83640/ild74.pdf" H 6750 950 50  0001 L CNN
+	1    6750 950 
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Isolator:ILD74 U9
+U 2 1 5F0821C9
+P 6750 1500
+F 0 "U9" H 6750 1825 50  0000 C CNN
+F 1 "ILD74" H 6750 1734 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W7.62mm_Socket" H 6550 1300 50  0001 L CIN
+F 3 "https://www.vishay.com/docs/83640/ild74.pdf" H 6750 1500 50  0001 L CNN
+	2    6750 1500
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	7050 1400 7150 1400
+Wire Wire Line
+	7150 1400 7150 1050
+Wire Wire Line
+	7150 1050 7050 1050
+Wire Wire Line
+	6350 1050 6450 1050
+$Comp
+L Device:R_US R10
+U 1 1 5F0821D3
+P 7050 2000
+F 0 "R10" V 6845 2000 50  0000 C CNN
+F 1 "120" V 6936 2000 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 7090 1990 50  0001 C CNN
+F 3 "~" H 7050 2000 50  0001 C CNN
+	1    7050 2000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	7200 2000 7250 2000
+Wire Wire Line
+	6350 1700 6350 1600
+Wire Wire Line
+	6350 1600 6350 1050
+Connection ~ 6350 1600
+Wire Wire Line
+	6350 1600 6450 1600
+Wire Wire Line
+	6450 1400 6100 1400
+Wire Wire Line
+	6450 850  6100 850 
+Wire Wire Line
+	7250 2000 7250 1600
+Connection ~ 7250 2000
+Wire Wire Line
+	7250 2000 7300 2000
+Wire Wire Line
+	7250 1600 7050 1600
+Wire Wire Line
+	7250 1600 7250 850 
+Wire Wire Line
+	7250 850  7050 850 
+Connection ~ 7250 1600
+Wire Wire Line
+	7150 1400 7150 1750
+Wire Wire Line
+	7150 1750 6850 1750
+Wire Wire Line
+	6850 1750 6850 2000
+Connection ~ 7150 1400
+Connection ~ 6850 2000
+Wire Wire Line
+	6850 2000 6150 2000
+Text HLabel 6100 1400 0    50   Output ~ 0
+L2_OFF_HOOK_F
+Text HLabel 6100 850  0    50   Output ~ 0
+L2_OFF_HOOK_R
+$Comp
+L power:GND #PWR?
+U 1 1 5F0ACFE7
+P 6350 4700
+AR Path="/5BA4B80D/5F0ACFE7" Ref="#PWR?"  Part="1" 
+AR Path="/5BAA648F/5F0ACFE7" Ref="#PWR0122"  Part="1" 
+F 0 "#PWR0122" H 6350 4450 50  0001 C CNN
+F 1 "GND" H 6355 4527 50  0000 C CNN
+F 2 "" H 6350 4700 50  0001 C CNN
+F 3 "" H 6350 4700 50  0001 C CNN
+	1    6350 4700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6900 5000 6850 5000
+$Comp
+L Isolator:ILD74 U10
+U 1 1 5F0ACFEE
+P 6750 3950
+F 0 "U10" H 6750 4275 50  0000 C CNN
+F 1 "ILD74" H 6750 4184 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W7.62mm_Socket" H 6550 3750 50  0001 L CIN
+F 3 "https://www.vishay.com/docs/83640/ild74.pdf" H 6750 3950 50  0001 L CNN
+	1    6750 3950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Isolator:ILD74 U10
+U 2 1 5F0ACFF4
+P 6750 4500
+F 0 "U10" H 6750 4825 50  0000 C CNN
+F 1 "ILD74" H 6750 4734 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W7.62mm_Socket" H 6550 4300 50  0001 L CIN
+F 3 "https://www.vishay.com/docs/83640/ild74.pdf" H 6750 4500 50  0001 L CNN
+	2    6750 4500
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	7050 4400 7150 4400
+Wire Wire Line
+	7150 4400 7150 4050
+Wire Wire Line
+	7150 4050 7050 4050
+Wire Wire Line
+	6350 4050 6450 4050
+$Comp
+L Device:R_US R11
+U 1 1 5F0ACFFE
+P 7050 5000
+F 0 "R11" V 6845 5000 50  0000 C CNN
+F 1 "120" V 6936 5000 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 7090 4990 50  0001 C CNN
+F 3 "~" H 7050 5000 50  0001 C CNN
+	1    7050 5000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	7200 5000 7250 5000
+Wire Wire Line
+	6350 4700 6350 4600
+Wire Wire Line
+	6350 4600 6350 4050
+Connection ~ 6350 4600
+Wire Wire Line
+	6350 4600 6450 4600
+Wire Wire Line
+	6450 4400 6100 4400
+Wire Wire Line
+	6450 3850 6100 3850
+Wire Wire Line
+	7250 5000 7250 4600
+Connection ~ 7250 5000
+Wire Wire Line
+	7250 5000 7300 5000
+Wire Wire Line
+	7250 4600 7050 4600
+Wire Wire Line
+	7250 4600 7250 3850
+Wire Wire Line
+	7250 3850 7050 3850
+Connection ~ 7250 4600
+Wire Wire Line
+	7150 4400 7150 4750
+Wire Wire Line
+	7150 4750 6850 4750
+Wire Wire Line
+	6850 4750 6850 5000
+Connection ~ 7150 4400
+Connection ~ 6850 5000
+Wire Wire Line
+	6850 5000 6150 5000
+Text HLabel 6100 4400 0    50   Output ~ 0
+L4_OFF_HOOK_F
+Text HLabel 6100 3850 0    50   Output ~ 0
+L4_OFF_HOOK_R
+$Comp
+L power:GND #PWR?
+U 1 1 5F0D2B36
+P 1600 4700
+AR Path="/5BA4B80D/5F0D2B36" Ref="#PWR?"  Part="1" 
+AR Path="/5BAA648F/5F0D2B36" Ref="#PWR0123"  Part="1" 
+F 0 "#PWR0123" H 1600 4450 50  0001 C CNN
+F 1 "GND" H 1605 4527 50  0000 C CNN
+F 2 "" H 1600 4700 50  0001 C CNN
+F 3 "" H 1600 4700 50  0001 C CNN
+	1    1600 4700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2150 5000 2100 5000
+$Comp
+L Isolator:ILD74 U8
+U 1 1 5F0D2B3D
+P 2000 3950
+F 0 "U8" H 2000 4275 50  0000 C CNN
+F 1 "ILD74" H 2000 4184 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W7.62mm_Socket" H 1800 3750 50  0001 L CIN
+F 3 "https://www.vishay.com/docs/83640/ild74.pdf" H 2000 3950 50  0001 L CNN
+	1    2000 3950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Isolator:ILD74 U8
+U 2 1 5F0D2B43
+P 2000 4500
+F 0 "U8" H 2000 4825 50  0000 C CNN
+F 1 "ILD74" H 2000 4734 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W7.62mm_Socket" H 1800 4300 50  0001 L CIN
+F 3 "https://www.vishay.com/docs/83640/ild74.pdf" H 2000 4500 50  0001 L CNN
+	2    2000 4500
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	2300 4400 2400 4400
+Wire Wire Line
+	2400 4400 2400 4050
+Wire Wire Line
+	2400 4050 2300 4050
+Wire Wire Line
+	1600 4050 1700 4050
+$Comp
+L Device:R_US R7
+U 1 1 5F0D2B4D
+P 2300 5000
+F 0 "R7" V 2095 5000 50  0000 C CNN
+F 1 "120" V 2186 5000 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 2340 4990 50  0001 C CNN
+F 3 "~" H 2300 5000 50  0001 C CNN
+	1    2300 5000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2450 5000 2500 5000
+Wire Wire Line
+	1600 4700 1600 4600
+Wire Wire Line
+	1600 4600 1600 4050
+Connection ~ 1600 4600
+Wire Wire Line
+	1600 4600 1700 4600
+Wire Wire Line
+	1700 4400 1350 4400
+Wire Wire Line
+	1700 3850 1350 3850
+Wire Wire Line
+	2500 5000 2500 4600
+Connection ~ 2500 5000
+Wire Wire Line
+	2500 5000 2550 5000
+Wire Wire Line
+	2500 4600 2300 4600
+Wire Wire Line
+	2500 4600 2500 3850
+Wire Wire Line
+	2500 3850 2300 3850
+Connection ~ 2500 4600
+Wire Wire Line
+	2400 4400 2400 4750
+Wire Wire Line
+	2400 4750 2100 4750
+Wire Wire Line
+	2100 4750 2100 5000
+Connection ~ 2400 4400
+Connection ~ 2100 5000
+Wire Wire Line
+	2100 5000 1400 5000
+Text HLabel 1350 4400 0    50   Output ~ 0
+L3_OFF_HOOK_F
+Text HLabel 1350 3850 0    50   Output ~ 0
+L3_OFF_HOOK_R
 $EndSCHEMATC

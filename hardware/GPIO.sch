@@ -132,30 +132,6 @@ Wire Wire Line
 Wire Wire Line
 	5950 3700 5950 3750
 $Comp
-L Connector:Conn_01x06_Male J9
-U 1 1 5E6121BB
-P 1500 4300
-F 0 "J9" H 1608 4681 50  0000 C CNN
-F 1 "Conn_01x06_Male" H 1608 4590 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 1500 4300 50  0001 C CNN
-F 3 "~" H 1500 4300 50  0001 C CNN
-	1    1500 4300
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR021
-U 1 1 5E614550
-P 1900 4300
-F 0 "#PWR021" H 1900 4050 50  0001 C CNN
-F 1 "GND" H 1905 4127 50  0000 C CNN
-F 2 "" H 1900 4300 50  0001 C CNN
-F 3 "" H 1900 4300 50  0001 C CNN
-	1    1900 4300
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	1700 4300 1900 4300
-$Comp
 L power:+5V #PWR026
 U 1 1 5E62000A
 P 6450 5200
@@ -166,25 +142,6 @@ F 3 "" H 6450 5200 50  0001 C CNN
 	1    6450 5200
 	1    0    0    -1  
 $EndComp
-$Comp
-L power:+5V #PWR020
-U 1 1 5E634B48
-P 1900 4200
-F 0 "#PWR020" H 1900 4050 50  0001 C CNN
-F 1 "+5V" H 1915 4373 50  0000 C CNN
-F 2 "" H 1900 4200 50  0001 C CNN
-F 3 "" H 1900 4200 50  0001 C CNN
-	1    1900 4200
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	1900 4200 1700 4200
-Wire Wire Line
-	1700 4500 3300 4500
-Wire Wire Line
-	1700 4100 2250 4100
-Wire Wire Line
-	2250 4100 2250 6250
 Wire Wire Line
 	2250 6250 5500 6250
 Wire Wire Line
@@ -327,14 +284,6 @@ Wire Wire Line
 	10050 5000 10150 5000
 Text HLabel 3150 2200 0    50   Input ~ 0
 TEST_STATUS_N
-Text HLabel 3050 4400 0    50   Input ~ 0
-L4_OFF_HOOK
-Text HLabel 3050 4300 0    50   Input ~ 0
-L3_OFF_HOOK
-Text HLabel 3050 4200 0    50   Input ~ 0
-L2_OFF_HOOK
-Text HLabel 3050 4100 0    50   Input ~ 0
-L1_OFF_HOOK
 $Comp
 L 74xx:74LS06 U?
 U 6 1 5BA4B01B
@@ -503,14 +452,6 @@ F 3 "http://www.ti.com/lit/gpn/sn74LS06" H 9750 4600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3050 4400 3300 4400
-Wire Wire Line
-	3050 4300 3300 4300
-Wire Wire Line
-	3050 4200 3300 4200
-Wire Wire Line
-	3050 4100 3300 4100
-Wire Wire Line
 	5500 3900 7950 3900
 Wire Wire Line
 	7950 3900 7950 3000
@@ -597,8 +538,8 @@ Wire Wire Line
 	1550 1950 2050 1950
 Text Label 2050 1950 0    50   ~ 0
 C1OUT
-Text Label 2400 3900 0    50   ~ 0
-RB0_L3_HOLD_CO
+Text Label 2550 4200 0    50   ~ 0
+RB3_L3_HOLD_CO
 Wire Wire Line
 	550  2150 1050 2150
 Text Label 550  2150 0    50   ~ 0
@@ -686,10 +627,6 @@ Text Label 6000 3200 0    50   ~ 0
 USB_DM
 Text Label 6000 3300 0    50   ~ 0
 USB_DP
-Text Label 2650 4500 0    50   ~ 0
-ICSP_PGC
-Text Label 2650 4600 0    50   ~ 0
-ICSP_PGD
 Text Label 2700 6250 0    50   ~ 0
 MCLR
 $Comp
@@ -709,8 +646,6 @@ Wire Wire Line
 	5650 6000 5650 6100
 Text Label 5700 3900 0    50   ~ 0
 RD0_L1_HOLD_CD
-Text Label 5700 4200 0    50   ~ 0
-RD3_L4_HOLD_CO
 $Comp
 L Device:C C10
 U 1 1 5EC7AE0D
@@ -770,20 +705,13 @@ RD1_DISPOSITION
 Text Label 5700 4400 0    50   ~ 0
 RD5_L2_HOLD_CO
 Text Label 8250 4600 0    50   ~ 0
-RB0_L3_HOLD_CO
+RB3_L3_HOLD_CO
 Text Label 5700 4500 0    50   ~ 0
 RD6_L3_COIN_CONTROL
 Text Label 5700 4600 0    50   ~ 0
 RD7_L2_COIN_CONTROL
 Text Label 7650 5200 0    50   ~ 0
 RB1_L4_COIN_CONTROL
-Wire Wire Line
-	3300 4600 2150 4600
-Wire Wire Line
-	2150 4600 2150 4400
-Wire Wire Line
-	2150 4400 1700 4400
-NoConn ~ 1700 4600
 $Sheet
 S 6750 3300 550  300 
 U 5ECF9A8A
@@ -933,16 +861,14 @@ Text Label 550  2250 0    50   ~ 0
 CCP1
 Text Label 2050 2250 0    50   ~ 0
 CCP2
-Text Label 2400 4000 0    50   ~ 0
+Text Label 2400 4400 0    50   ~ 0
 RB1_L4_COIN_CONTROL
 Wire Wire Line
-	2400 4000 3300 4000
+	2400 4400 3300 4400
 Wire Wire Line
-	2400 3900 3300 3900
+	2550 4300 3300 4300
 Wire Wire Line
-	7750 4200 5500 4200
-Wire Wire Line
-	7750 4200 7750 5000
+	5700 4200 5500 4200
 Wire Wire Line
 	5500 4600 7950 4600
 Wire Wire Line
@@ -1105,12 +1031,227 @@ Wire Wire Line
 	2950 7000 2950 7150
 Text Notes 7050 6900 0    197  Italic 39
 1D Coin Controller
-Text Notes 7100 7050 0    50   Italic 10
-(c) 2020, Howard M. Harte - WZ2Q
 Text Notes 10600 7650 0    50   ~ 0
-1
+2
 Text Notes 7450 7500 0    50   ~ 0
 1D Coin Controller - Microcontroller
 Text Notes 8200 7650 0    50   ~ 0
-2020-06-06
+2020-06-27
+$Comp
+L Interface_Expansion:MCP23008-xP U?
+U 1 1 5F10AA08
+P 1800 4100
+AR Path="/5BAA648F/5F10AA08" Ref="U?"  Part="1" 
+AR Path="/5BA49F1B/5F10AA08" Ref="U1"  Part="1" 
+F 0 "U1" H 1800 4881 50  0000 C CNN
+F 1 "MCP23008-xP" H 1800 4790 50  0000 C CNN
+F 2 "Package_DIP:DIP-18_W7.62mm" H 1800 3050 50  0001 C CNN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf" H 3100 2900 50  0001 C CNN
+	1    1800 4100
+	-1   0    0    -1  
+$EndComp
+Text HLabel 1050 4000 0    50   Input ~ 0
+L2_OFF_HOOK_R
+Text HLabel 1050 3900 0    50   Input ~ 0
+L2_OFF_HOOK_F
+Text HLabel 1050 3800 0    50   Input ~ 0
+L1_OFF_HOOK_R
+Text HLabel 1050 3700 0    50   Input ~ 0
+L1_OFF_HOOK_F
+Wire Wire Line
+	1050 4000 1300 4000
+Wire Wire Line
+	1050 3900 1300 3900
+Wire Wire Line
+	1050 3800 1300 3800
+Wire Wire Line
+	1050 3700 1300 3700
+Text HLabel 1050 4400 0    50   Input ~ 0
+L4_OFF_HOOK_R
+Text HLabel 1050 4300 0    50   Input ~ 0
+L4_OFF_HOOK_F
+Text HLabel 1050 4200 0    50   Input ~ 0
+L3_OFF_HOOK_R
+Text HLabel 1050 4100 0    50   Input ~ 0
+L3_OFF_HOOK_F
+Wire Wire Line
+	1050 4400 1300 4400
+Wire Wire Line
+	1050 4300 1300 4300
+Wire Wire Line
+	1050 4200 1300 4200
+Wire Wire Line
+	1050 4100 1300 4100
+$Comp
+L Connector:Conn_01x06_Male J9
+U 1 1 5F16CAEC
+P 1500 5700
+F 0 "J9" H 1608 6081 50  0000 C CNN
+F 1 "Conn_01x06_Male" H 1608 5990 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 1500 5700 50  0001 C CNN
+F 3 "~" H 1500 5700 50  0001 C CNN
+	1    1500 5700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0115
+U 1 1 5F16CAF2
+P 1900 5700
+F 0 "#PWR0115" H 1900 5450 50  0001 C CNN
+F 1 "GND" H 1905 5527 50  0000 C CNN
+F 2 "" H 1900 5700 50  0001 C CNN
+F 3 "" H 1900 5700 50  0001 C CNN
+	1    1900 5700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1700 5700 1900 5700
+$Comp
+L power:+5V #PWR0118
+U 1 1 5F16CAF9
+P 1900 5600
+F 0 "#PWR0118" H 1900 5450 50  0001 C CNN
+F 1 "+5V" H 1915 5773 50  0000 C CNN
+F 2 "" H 1900 5600 50  0001 C CNN
+F 3 "" H 1900 5600 50  0001 C CNN
+	1    1900 5600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1900 5600 1700 5600
+Wire Wire Line
+	1700 5900 2800 5900
+Wire Wire Line
+	1700 5500 2250 5500
+Text Label 2350 5900 0    50   ~ 0
+ICSP_PGC
+Text Label 2350 5800 0    50   ~ 0
+ICSP_PGD
+NoConn ~ 1700 6000
+Wire Wire Line
+	2250 6250 2250 5500
+Wire Wire Line
+	2800 5900 2800 4500
+Wire Wire Line
+	2800 4500 3300 4500
+Wire Wire Line
+	2900 5800 2900 4600
+Wire Wire Line
+	2900 4600 3300 4600
+Wire Wire Line
+	1700 5800 2900 5800
+Wire Wire Line
+	3300 4100 2300 4100
+Wire Wire Line
+	2300 3800 2900 3800
+Wire Wire Line
+	2900 3800 2900 4000
+Wire Wire Line
+	2900 4000 3300 4000
+Wire Wire Line
+	3300 3900 2300 3900
+Wire Wire Line
+	2300 3700 2400 3700
+Wire Wire Line
+	2300 4300 2350 4300
+Wire Wire Line
+	2350 4300 2350 4400
+Wire Wire Line
+	2350 4800 1800 4800
+Wire Wire Line
+	1800 4800 1800 4700
+Wire Wire Line
+	2300 4400 2350 4400
+Connection ~ 2350 4400
+Wire Wire Line
+	2350 4400 2350 4500
+Wire Wire Line
+	2300 4500 2350 4500
+Connection ~ 2350 4500
+Wire Wire Line
+	2350 4500 2350 4800
+$Comp
+L power:GND #PWR0119
+U 1 1 5F201619
+P 1800 4900
+F 0 "#PWR0119" H 1800 4650 50  0001 C CNN
+F 1 "GND" H 1805 4727 50  0000 C CNN
+F 2 "" H 1800 4900 50  0001 C CNN
+F 3 "" H 1800 4900 50  0001 C CNN
+	1    1800 4900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1800 4900 1800 4800
+Connection ~ 1800 4800
+$Comp
+L power:+5V #PWR0120
+U 1 1 5F219A9D
+P 1800 3250
+F 0 "#PWR0120" H 1800 3100 50  0001 C CNN
+F 1 "+5V" H 1815 3423 50  0000 C CNN
+F 2 "" H 1800 3250 50  0001 C CNN
+F 3 "" H 1800 3250 50  0001 C CNN
+	1    1800 3250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1800 3500 1800 3250
+Text Label 2400 3800 0    50   ~ 0
+I2C_SCL
+Text Label 2400 3900 0    50   ~ 0
+I2C_SDA
+Text Label 2400 4100 0    50   ~ 0
+I2C_INT
+Text Label 2400 3700 0    50   ~ 0
+I2C_RESET
+Wire Wire Line
+	2550 4200 3300 4200
+Text Label 7750 5000 0    50   ~ 0
+RB4_L4_HOLD_CO
+Text Label 2550 4300 0    50   ~ 0
+RB4_L4_HOLD_CO
+Text Label 5700 4200 0    50   ~ 0
+I2C_RESET
+$Comp
+L power:+5V #PWR0124
+U 1 1 5F47A87E
+P 2000 6550
+F 0 "#PWR0124" H 2000 6400 50  0001 C CNN
+F 1 "+5V" H 2015 6723 50  0000 C CNN
+F 2 "" H 2000 6550 50  0001 C CNN
+F 3 "" H 2000 6550 50  0001 C CNN
+	1    2000 6550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C24
+U 1 1 5F47A888
+P 2000 6850
+F 0 "C24" H 2115 6896 50  0000 L CNN
+F 1 "0.1uF" H 2115 6805 50  0000 L CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W2.0mm_P2.50mm" H 2038 6700 50  0001 C CNN
+F 3 "~" H 2000 6850 50  0001 C CNN
+	1    2000 6850
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5F47A892
+P 2000 7150
+AR Path="/5F47A892" Ref="#PWR?"  Part="1" 
+AR Path="/5BA49F1B/5F47A892" Ref="#PWR0125"  Part="1" 
+F 0 "#PWR0125" H 2000 6900 50  0001 C CNN
+F 1 "GND" H 2005 6977 50  0000 C CNN
+F 2 "" H 2000 7150 50  0001 C CNN
+F 3 "" H 2000 7150 50  0001 C CNN
+	1    2000 7150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 6700 2000 6550
+Wire Wire Line
+	2000 7000 2000 7150
+Text Notes 7100 7100 0    50   Italic 10
+(c) 2020, Howard M. Harte - WZ2Q\nhttps://github.com/hharte/1dcoinctrl
 $EndSCHEMATC

@@ -328,8 +328,8 @@ F 3 " ~" H 7450 3700 50  0001 C CNN
 $EndComp
 Text Notes 7050 6900 0    197  Italic 39
 1D Coin Controller
-Text Notes 7100 7050 0    50   Italic 10
-(c) 2020, Howard M. Harte - WZ2Q
 Text Notes 10600 7650 0    50   ~ 0
 1
+Text Notes 7100 7100 0    50   Italic 10
+(c) 2020, Howard M. Harte - WZ2Q\nhttps://github.com/hharte/1dcoinctrl
 $EndSCHEMATC

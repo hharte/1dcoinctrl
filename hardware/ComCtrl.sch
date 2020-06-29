@@ -315,12 +315,12 @@ Wire Wire Line
 	4250 1400 4650 1400
 Text Notes 7050 6900 0    197  Italic 39
 1D Coin Controller
-Text Notes 7100 7050 0    50   Italic 10
-(c) 2020, Howard M. Harte - WZ2Q
 Text Notes 10600 7650 0    50   ~ 0
 1
 Text Notes 7450 7500 0    50   ~ 0
 1D Coin Controller - Common Control
 Text Notes 8200 7650 0    50   ~ 0
 2020-06-06
+Text Notes 7100 7100 0    50   Italic 10
+(c) 2020, Howard M. Harte - WZ2Q\nhttps://github.com/hharte/1dcoinctrl
 $EndSCHEMATC

@@ -209,7 +209,7 @@ U 1 1 5E807C55
 P 7400 3400
 F 0 "C2" H 7515 3446 50  0000 L CNN
 F 1 "4.7uF 250V" H 7515 3355 50  0000 L CNN
-F 2 "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm" H 7400 3400 50  0001 C CNN
+F 2 "Capacitor_THT:CP_Radial_D8.0mm_P3.50mm" H 7400 3400 50  0001 C CNN
 F 3 "~" H 7400 3400 50  0001 C CNN
 	1    7400 3400
 	1    0    0    -1  
@@ -356,8 +356,6 @@ F 12 "Active" H 7950 2500 60  0001 L CNN "Status"
 $EndComp
 Wire Wire Line
 	4900 1200 7100 1200
-Wire Wire Line
-	3400 1200 4900 1200
 Wire Wire Line
 	8300 1200 8900 1200
 Wire Wire Line
@@ -548,12 +546,14 @@ F 3 "~" H 2750 3800 50  0001 C CNN
 $EndComp
 Text Notes 7000 6900 0    197  Italic 39
 1D Coin Controller
-Text Notes 7050 7050 0    50   Italic 10
-(c) 2020, Howard M. Harte - WZ2Q
 Text Notes 10550 7650 0    50   ~ 0
-1
+2
 Text Notes 7400 7500 0    50   ~ 0
 1D Coin Controller - Power Supply
 Text Notes 8150 7650 0    50   ~ 0
-2020-06-06
+2020-06-27
+Text Notes 2450 3600 0    50   ~ 0
+Earth Ground Pad
+Text Notes 7050 7100 0    50   Italic 10
+(c) 2020, Howard M. Harte - WZ2Q\nhttps://github.com/hharte/1dcoinctrl
 $EndSCHEMATC
