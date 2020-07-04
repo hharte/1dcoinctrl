@@ -51,9 +51,11 @@ void SYSTEM_Initialize(void)
 {
 
     INTERRUPT_Initialize();
+    I2C1_Initialize();
     PIN_MANAGER_Initialize();
     OSCILLATOR_Initialize();
     USBDeviceInit();
+    EXT_INT_Initialize();
     TMR0_Initialize();
     USBDeviceAttach();
     EUSART1_Initialize();

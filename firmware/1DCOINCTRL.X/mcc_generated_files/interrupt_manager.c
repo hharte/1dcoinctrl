@@ -62,19 +62,23 @@ void __interrupt() INTERRUPT_InterruptManager (void)
     {
         TMR0_ISR();
     }
+    else if(INTCON3bits.INT2IE == 1 && INTCON3bits.INT2IF == 1)
+    {
+        INT2_ISR();
+    }
     else if(INTCONbits.PEIE == 1)
     {
         if(PIE3bits.USBIE == 1 && PIR3bits.USBIF == 1)
         {
             USB_USBDeviceTasks();
         } 
-        else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)
-        {
-            EUSART1_TxDefaultInterruptHandler();
-        } 
         else if(PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1)
         {
             EUSART1_RxDefaultInterruptHandler();
+        } 
+        else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)
+        {
+            EUSART1_TxDefaultInterruptHandler();
         } 
         else
         {

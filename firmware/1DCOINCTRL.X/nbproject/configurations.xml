@@ -7,6 +7,9 @@
       <logicalFolder name="MCC Generated Files"
                      displayName="MCC Generated Files"
                      projectFiles="true">
+        <logicalFolder name="examples" displayName="examples" projectFiles="true">
+          <itemPath>mcc_generated_files/examples/i2c1_master_example.h</itemPath>
+        </logicalFolder>
         <logicalFolder name="usb" displayName="usb" projectFiles="true">
           <itemPath>mcc_generated_files/usb/usb_ch9.h</itemPath>
           <itemPath>mcc_generated_files/usb/usb_device.h</itemPath>
@@ -25,6 +28,8 @@
         <itemPath>mcc_generated_files/pin_manager.h</itemPath>
         <itemPath>mcc_generated_files/device_config.h</itemPath>
         <itemPath>mcc_generated_files/tmr0.h</itemPath>
+        <itemPath>mcc_generated_files/i2c1_master.h</itemPath>
+        <itemPath>mcc_generated_files/ext_int.h</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -37,6 +42,9 @@
       <logicalFolder name="MCC Generated Files"
                      displayName="MCC Generated Files"
                      projectFiles="true">
+        <logicalFolder name="examples" displayName="examples" projectFiles="true">
+          <itemPath>mcc_generated_files/examples/i2c1_master_example.c</itemPath>
+        </logicalFolder>
         <logicalFolder name="usb" displayName="usb" projectFiles="true">
           <itemPath>mcc_generated_files/usb/example_mcc_usb_cdc.c</itemPath>
           <itemPath>mcc_generated_files/usb/usb_device_events.c</itemPath>
@@ -50,6 +58,8 @@
         <itemPath>mcc_generated_files/pin_manager.c</itemPath>
         <itemPath>mcc_generated_files/device_config.c</itemPath>
         <itemPath>mcc_generated_files/tmr0.c</itemPath>
+        <itemPath>mcc_generated_files/i2c1_master.c</itemPath>
+        <itemPath>mcc_generated_files/ext_int.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>1dcoinctrl.c</itemPath>
@@ -69,10 +79,10 @@
         <targetDevice>PIC18F45K50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>snap</platformTool>
+        <platformTool>ICD4Tool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.10</languageToolchainVersion>
-        <platform>3</platform>
+        <platform>4</platform>
       </toolsSet>
       <packs>
         <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.2.72"/>

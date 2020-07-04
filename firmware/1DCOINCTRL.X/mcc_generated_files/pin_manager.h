@@ -65,107 +65,97 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
+// get/set RB0 procedures
+#define RB0_SetHigh()            do { LATBbits.LATB0 = 1; } while(0)
+#define RB0_SetLow()             do { LATBbits.LATB0 = 0; } while(0)
+#define RB0_Toggle()             do { LATBbits.LATB0 = ~LATBbits.LATB0; } while(0)
+#define RB0_GetValue()              PORTBbits.RB0
+#define RB0_SetDigitalInput()    do { TRISBbits.TRISB0 = 1; } while(0)
+#define RB0_SetDigitalOutput()   do { TRISBbits.TRISB0 = 0; } while(0)
+#define RB0_SetPullup()             do { WPUBbits.WPUB0 = 1; } while(0)
+#define RB0_ResetPullup()           do { WPUBbits.WPUB0 = 0; } while(0)
+#define RB0_SetAnalogMode()         do { ANSELBbits.ANSB0 = 1; } while(0)
+#define RB0_SetDigitalMode()        do { ANSELBbits.ANSB0 = 0; } while(0)
+
+// get/set RB1 procedures
+#define RB1_SetHigh()            do { LATBbits.LATB1 = 1; } while(0)
+#define RB1_SetLow()             do { LATBbits.LATB1 = 0; } while(0)
+#define RB1_Toggle()             do { LATBbits.LATB1 = ~LATBbits.LATB1; } while(0)
+#define RB1_GetValue()              PORTBbits.RB1
+#define RB1_SetDigitalInput()    do { TRISBbits.TRISB1 = 1; } while(0)
+#define RB1_SetDigitalOutput()   do { TRISBbits.TRISB1 = 0; } while(0)
+#define RB1_SetPullup()             do { WPUBbits.WPUB1 = 1; } while(0)
+#define RB1_ResetPullup()           do { WPUBbits.WPUB1 = 0; } while(0)
+#define RB1_SetAnalogMode()         do { ANSELBbits.ANSB1 = 1; } while(0)
+#define RB1_SetDigitalMode()        do { ANSELBbits.ANSB1 = 0; } while(0)
+
+// get/set I2C_INT aliases
+#define I2C_INT_TRIS                 TRISBbits.TRISB2
+#define I2C_INT_LAT                  LATBbits.LATB2
+#define I2C_INT_PORT                 PORTBbits.RB2
+#define I2C_INT_WPU                  WPUBbits.WPUB2
+#define I2C_INT_ANS                  ANSELBbits.ANSB2
+#define I2C_INT_SetHigh()            do { LATBbits.LATB2 = 1; } while(0)
+#define I2C_INT_SetLow()             do { LATBbits.LATB2 = 0; } while(0)
+#define I2C_INT_Toggle()             do { LATBbits.LATB2 = ~LATBbits.LATB2; } while(0)
+#define I2C_INT_GetValue()           PORTBbits.RB2
+#define I2C_INT_SetDigitalInput()    do { TRISBbits.TRISB2 = 1; } while(0)
+#define I2C_INT_SetDigitalOutput()   do { TRISBbits.TRISB2 = 0; } while(0)
+#define I2C_INT_SetPullup()          do { WPUBbits.WPUB2 = 1; } while(0)
+#define I2C_INT_ResetPullup()        do { WPUBbits.WPUB2 = 0; } while(0)
+#define I2C_INT_SetAnalogMode()      do { ANSELBbits.ANSB2 = 1; } while(0)
+#define I2C_INT_SetDigitalMode()     do { ANSELBbits.ANSB2 = 0; } while(0)
+
 // get/set L3_HOLD_CO aliases
-#define L3_HOLD_CO_TRIS                 TRISBbits.TRISB0
-#define L3_HOLD_CO_LAT                  LATBbits.LATB0
-#define L3_HOLD_CO_PORT                 PORTBbits.RB0
-#define L3_HOLD_CO_WPU                  WPUBbits.WPUB0
-#define L3_HOLD_CO_ANS                  ANSELBbits.ANSB0
-#define L3_HOLD_CO_SetHigh()            do { LATBbits.LATB0 = 1; } while(0)
-#define L3_HOLD_CO_SetLow()             do { LATBbits.LATB0 = 0; } while(0)
-#define L3_HOLD_CO_Toggle()             do { LATBbits.LATB0 = ~LATBbits.LATB0; } while(0)
-#define L3_HOLD_CO_GetValue()           PORTBbits.RB0
-#define L3_HOLD_CO_SetDigitalInput()    do { TRISBbits.TRISB0 = 1; } while(0)
-#define L3_HOLD_CO_SetDigitalOutput()   do { TRISBbits.TRISB0 = 0; } while(0)
-#define L3_HOLD_CO_SetPullup()          do { WPUBbits.WPUB0 = 1; } while(0)
-#define L3_HOLD_CO_ResetPullup()        do { WPUBbits.WPUB0 = 0; } while(0)
-#define L3_HOLD_CO_SetAnalogMode()      do { ANSELBbits.ANSB0 = 1; } while(0)
-#define L3_HOLD_CO_SetDigitalMode()     do { ANSELBbits.ANSB0 = 0; } while(0)
+#define L3_HOLD_CO_TRIS                 TRISBbits.TRISB3
+#define L3_HOLD_CO_LAT                  LATBbits.LATB3
+#define L3_HOLD_CO_PORT                 PORTBbits.RB3
+#define L3_HOLD_CO_WPU                  WPUBbits.WPUB3
+#define L3_HOLD_CO_ANS                  ANSELBbits.ANSB3
+#define L3_HOLD_CO_SetHigh()            do { LATBbits.LATB3 = 1; } while(0)
+#define L3_HOLD_CO_SetLow()             do { LATBbits.LATB3 = 0; } while(0)
+#define L3_HOLD_CO_Toggle()             do { LATBbits.LATB3 = ~LATBbits.LATB3; } while(0)
+#define L3_HOLD_CO_GetValue()           PORTBbits.RB3
+#define L3_HOLD_CO_SetDigitalInput()    do { TRISBbits.TRISB3 = 1; } while(0)
+#define L3_HOLD_CO_SetDigitalOutput()   do { TRISBbits.TRISB3 = 0; } while(0)
+#define L3_HOLD_CO_SetPullup()          do { WPUBbits.WPUB3 = 1; } while(0)
+#define L3_HOLD_CO_ResetPullup()        do { WPUBbits.WPUB3 = 0; } while(0)
+#define L3_HOLD_CO_SetAnalogMode()      do { ANSELBbits.ANSB3 = 1; } while(0)
+#define L3_HOLD_CO_SetDigitalMode()     do { ANSELBbits.ANSB3 = 0; } while(0)
+
+// get/set L4_HOLD_CO aliases
+#define L4_HOLD_CO_TRIS                 TRISBbits.TRISB4
+#define L4_HOLD_CO_LAT                  LATBbits.LATB4
+#define L4_HOLD_CO_PORT                 PORTBbits.RB4
+#define L4_HOLD_CO_WPU                  WPUBbits.WPUB4
+#define L4_HOLD_CO_ANS                  ANSELBbits.ANSB4
+#define L4_HOLD_CO_SetHigh()            do { LATBbits.LATB4 = 1; } while(0)
+#define L4_HOLD_CO_SetLow()             do { LATBbits.LATB4 = 0; } while(0)
+#define L4_HOLD_CO_Toggle()             do { LATBbits.LATB4 = ~LATBbits.LATB4; } while(0)
+#define L4_HOLD_CO_GetValue()           PORTBbits.RB4
+#define L4_HOLD_CO_SetDigitalInput()    do { TRISBbits.TRISB4 = 1; } while(0)
+#define L4_HOLD_CO_SetDigitalOutput()   do { TRISBbits.TRISB4 = 0; } while(0)
+#define L4_HOLD_CO_SetPullup()          do { WPUBbits.WPUB4 = 1; } while(0)
+#define L4_HOLD_CO_ResetPullup()        do { WPUBbits.WPUB4 = 0; } while(0)
+#define L4_HOLD_CO_SetAnalogMode()      do { ANSELBbits.ANSB4 = 1; } while(0)
+#define L4_HOLD_CO_SetDigitalMode()     do { ANSELBbits.ANSB4 = 0; } while(0)
 
 // get/set L4_COIN_CONTROL aliases
-#define L4_COIN_CONTROL_TRIS                 TRISBbits.TRISB1
-#define L4_COIN_CONTROL_LAT                  LATBbits.LATB1
-#define L4_COIN_CONTROL_PORT                 PORTBbits.RB1
-#define L4_COIN_CONTROL_WPU                  WPUBbits.WPUB1
-#define L4_COIN_CONTROL_ANS                  ANSELBbits.ANSB1
-#define L4_COIN_CONTROL_SetHigh()            do { LATBbits.LATB1 = 1; } while(0)
-#define L4_COIN_CONTROL_SetLow()             do { LATBbits.LATB1 = 0; } while(0)
-#define L4_COIN_CONTROL_Toggle()             do { LATBbits.LATB1 = ~LATBbits.LATB1; } while(0)
-#define L4_COIN_CONTROL_GetValue()           PORTBbits.RB1
-#define L4_COIN_CONTROL_SetDigitalInput()    do { TRISBbits.TRISB1 = 1; } while(0)
-#define L4_COIN_CONTROL_SetDigitalOutput()   do { TRISBbits.TRISB1 = 0; } while(0)
-#define L4_COIN_CONTROL_SetPullup()          do { WPUBbits.WPUB1 = 1; } while(0)
-#define L4_COIN_CONTROL_ResetPullup()        do { WPUBbits.WPUB1 = 0; } while(0)
-#define L4_COIN_CONTROL_SetAnalogMode()      do { ANSELBbits.ANSB1 = 1; } while(0)
-#define L4_COIN_CONTROL_SetDigitalMode()     do { ANSELBbits.ANSB1 = 0; } while(0)
-
-// get/set L1_OFF_HOOK aliases
-#define L1_OFF_HOOK_TRIS                 TRISBbits.TRISB2
-#define L1_OFF_HOOK_LAT                  LATBbits.LATB2
-#define L1_OFF_HOOK_PORT                 PORTBbits.RB2
-#define L1_OFF_HOOK_WPU                  WPUBbits.WPUB2
-#define L1_OFF_HOOK_ANS                  ANSELBbits.ANSB2
-#define L1_OFF_HOOK_SetHigh()            do { LATBbits.LATB2 = 1; } while(0)
-#define L1_OFF_HOOK_SetLow()             do { LATBbits.LATB2 = 0; } while(0)
-#define L1_OFF_HOOK_Toggle()             do { LATBbits.LATB2 = ~LATBbits.LATB2; } while(0)
-#define L1_OFF_HOOK_GetValue()           PORTBbits.RB2
-#define L1_OFF_HOOK_SetDigitalInput()    do { TRISBbits.TRISB2 = 1; } while(0)
-#define L1_OFF_HOOK_SetDigitalOutput()   do { TRISBbits.TRISB2 = 0; } while(0)
-#define L1_OFF_HOOK_SetPullup()          do { WPUBbits.WPUB2 = 1; } while(0)
-#define L1_OFF_HOOK_ResetPullup()        do { WPUBbits.WPUB2 = 0; } while(0)
-#define L1_OFF_HOOK_SetAnalogMode()      do { ANSELBbits.ANSB2 = 1; } while(0)
-#define L1_OFF_HOOK_SetDigitalMode()     do { ANSELBbits.ANSB2 = 0; } while(0)
-
-// get/set L2_OFF_HOOK aliases
-#define L2_OFF_HOOK_TRIS                 TRISBbits.TRISB3
-#define L2_OFF_HOOK_LAT                  LATBbits.LATB3
-#define L2_OFF_HOOK_PORT                 PORTBbits.RB3
-#define L2_OFF_HOOK_WPU                  WPUBbits.WPUB3
-#define L2_OFF_HOOK_ANS                  ANSELBbits.ANSB3
-#define L2_OFF_HOOK_SetHigh()            do { LATBbits.LATB3 = 1; } while(0)
-#define L2_OFF_HOOK_SetLow()             do { LATBbits.LATB3 = 0; } while(0)
-#define L2_OFF_HOOK_Toggle()             do { LATBbits.LATB3 = ~LATBbits.LATB3; } while(0)
-#define L2_OFF_HOOK_GetValue()           PORTBbits.RB3
-#define L2_OFF_HOOK_SetDigitalInput()    do { TRISBbits.TRISB3 = 1; } while(0)
-#define L2_OFF_HOOK_SetDigitalOutput()   do { TRISBbits.TRISB3 = 0; } while(0)
-#define L2_OFF_HOOK_SetPullup()          do { WPUBbits.WPUB3 = 1; } while(0)
-#define L2_OFF_HOOK_ResetPullup()        do { WPUBbits.WPUB3 = 0; } while(0)
-#define L2_OFF_HOOK_SetAnalogMode()      do { ANSELBbits.ANSB3 = 1; } while(0)
-#define L2_OFF_HOOK_SetDigitalMode()     do { ANSELBbits.ANSB3 = 0; } while(0)
-
-// get/set L3_OFF_HOOK aliases
-#define L3_OFF_HOOK_TRIS                 TRISBbits.TRISB4
-#define L3_OFF_HOOK_LAT                  LATBbits.LATB4
-#define L3_OFF_HOOK_PORT                 PORTBbits.RB4
-#define L3_OFF_HOOK_WPU                  WPUBbits.WPUB4
-#define L3_OFF_HOOK_ANS                  ANSELBbits.ANSB4
-#define L3_OFF_HOOK_SetHigh()            do { LATBbits.LATB4 = 1; } while(0)
-#define L3_OFF_HOOK_SetLow()             do { LATBbits.LATB4 = 0; } while(0)
-#define L3_OFF_HOOK_Toggle()             do { LATBbits.LATB4 = ~LATBbits.LATB4; } while(0)
-#define L3_OFF_HOOK_GetValue()           PORTBbits.RB4
-#define L3_OFF_HOOK_SetDigitalInput()    do { TRISBbits.TRISB4 = 1; } while(0)
-#define L3_OFF_HOOK_SetDigitalOutput()   do { TRISBbits.TRISB4 = 0; } while(0)
-#define L3_OFF_HOOK_SetPullup()          do { WPUBbits.WPUB4 = 1; } while(0)
-#define L3_OFF_HOOK_ResetPullup()        do { WPUBbits.WPUB4 = 0; } while(0)
-#define L3_OFF_HOOK_SetAnalogMode()      do { ANSELBbits.ANSB4 = 1; } while(0)
-#define L3_OFF_HOOK_SetDigitalMode()     do { ANSELBbits.ANSB4 = 0; } while(0)
-
-// get/set L4_OFF_HOOK aliases
-#define L4_OFF_HOOK_TRIS                 TRISBbits.TRISB5
-#define L4_OFF_HOOK_LAT                  LATBbits.LATB5
-#define L4_OFF_HOOK_PORT                 PORTBbits.RB5
-#define L4_OFF_HOOK_WPU                  WPUBbits.WPUB5
-#define L4_OFF_HOOK_ANS                  ANSELBbits.ANSB5
-#define L4_OFF_HOOK_SetHigh()            do { LATBbits.LATB5 = 1; } while(0)
-#define L4_OFF_HOOK_SetLow()             do { LATBbits.LATB5 = 0; } while(0)
-#define L4_OFF_HOOK_Toggle()             do { LATBbits.LATB5 = ~LATBbits.LATB5; } while(0)
-#define L4_OFF_HOOK_GetValue()           PORTBbits.RB5
-#define L4_OFF_HOOK_SetDigitalInput()    do { TRISBbits.TRISB5 = 1; } while(0)
-#define L4_OFF_HOOK_SetDigitalOutput()   do { TRISBbits.TRISB5 = 0; } while(0)
-#define L4_OFF_HOOK_SetPullup()          do { WPUBbits.WPUB5 = 1; } while(0)
-#define L4_OFF_HOOK_ResetPullup()        do { WPUBbits.WPUB5 = 0; } while(0)
-#define L4_OFF_HOOK_SetAnalogMode()      do { ANSELBbits.ANSB5 = 1; } while(0)
-#define L4_OFF_HOOK_SetDigitalMode()     do { ANSELBbits.ANSB5 = 0; } while(0)
+#define L4_COIN_CONTROL_TRIS                 TRISBbits.TRISB5
+#define L4_COIN_CONTROL_LAT                  LATBbits.LATB5
+#define L4_COIN_CONTROL_PORT                 PORTBbits.RB5
+#define L4_COIN_CONTROL_WPU                  WPUBbits.WPUB5
+#define L4_COIN_CONTROL_ANS                  ANSELBbits.ANSB5
+#define L4_COIN_CONTROL_SetHigh()            do { LATBbits.LATB5 = 1; } while(0)
+#define L4_COIN_CONTROL_SetLow()             do { LATBbits.LATB5 = 0; } while(0)
+#define L4_COIN_CONTROL_Toggle()             do { LATBbits.LATB5 = ~LATBbits.LATB5; } while(0)
+#define L4_COIN_CONTROL_GetValue()           PORTBbits.RB5
+#define L4_COIN_CONTROL_SetDigitalInput()    do { TRISBbits.TRISB5 = 1; } while(0)
+#define L4_COIN_CONTROL_SetDigitalOutput()   do { TRISBbits.TRISB5 = 0; } while(0)
+#define L4_COIN_CONTROL_SetPullup()          do { WPUBbits.WPUB5 = 1; } while(0)
+#define L4_COIN_CONTROL_ResetPullup()        do { WPUBbits.WPUB5 = 0; } while(0)
+#define L4_COIN_CONTROL_SetAnalogMode()      do { ANSELBbits.ANSB5 = 1; } while(0)
+#define L4_COIN_CONTROL_SetDigitalMode()     do { ANSELBbits.ANSB5 = 0; } while(0)
 
 // get/set TEST_STATUS aliases
 #define TEST_STATUS_TRIS                 TRISCbits.TRISC0
@@ -240,19 +230,19 @@
 #define REFUND_SetAnalogMode()      do { ANSELDbits.ANSD2 = 1; } while(0)
 #define REFUND_SetDigitalMode()     do { ANSELDbits.ANSD2 = 0; } while(0)
 
-// get/set L4_HOLD_CO aliases
-#define L4_HOLD_CO_TRIS                 TRISDbits.TRISD3
-#define L4_HOLD_CO_LAT                  LATDbits.LATD3
-#define L4_HOLD_CO_PORT                 PORTDbits.RD3
-#define L4_HOLD_CO_ANS                  ANSELDbits.ANSD3
-#define L4_HOLD_CO_SetHigh()            do { LATDbits.LATD3 = 1; } while(0)
-#define L4_HOLD_CO_SetLow()             do { LATDbits.LATD3 = 0; } while(0)
-#define L4_HOLD_CO_Toggle()             do { LATDbits.LATD3 = ~LATDbits.LATD3; } while(0)
-#define L4_HOLD_CO_GetValue()           PORTDbits.RD3
-#define L4_HOLD_CO_SetDigitalInput()    do { TRISDbits.TRISD3 = 1; } while(0)
-#define L4_HOLD_CO_SetDigitalOutput()   do { TRISDbits.TRISD3 = 0; } while(0)
-#define L4_HOLD_CO_SetAnalogMode()      do { ANSELDbits.ANSD3 = 1; } while(0)
-#define L4_HOLD_CO_SetDigitalMode()     do { ANSELDbits.ANSD3 = 0; } while(0)
+// get/set I2C_RESET_N aliases
+#define I2C_RESET_N_TRIS                 TRISDbits.TRISD3
+#define I2C_RESET_N_LAT                  LATDbits.LATD3
+#define I2C_RESET_N_PORT                 PORTDbits.RD3
+#define I2C_RESET_N_ANS                  ANSELDbits.ANSD3
+#define I2C_RESET_N_SetHigh()            do { LATDbits.LATD3 = 1; } while(0)
+#define I2C_RESET_N_SetLow()             do { LATDbits.LATD3 = 0; } while(0)
+#define I2C_RESET_N_Toggle()             do { LATDbits.LATD3 = ~LATDbits.LATD3; } while(0)
+#define I2C_RESET_N_GetValue()           PORTDbits.RD3
+#define I2C_RESET_N_SetDigitalInput()    do { TRISDbits.TRISD3 = 1; } while(0)
+#define I2C_RESET_N_SetDigitalOutput()   do { TRISDbits.TRISD3 = 0; } while(0)
+#define I2C_RESET_N_SetAnalogMode()      do { ANSELDbits.ANSD3 = 1; } while(0)
+#define I2C_RESET_N_SetDigitalMode()     do { ANSELDbits.ANSD3 = 0; } while(0)
 
 // get/set L1_COIN_CONTROL aliases
 #define L1_COIN_CONTROL_TRIS                 TRISDbits.TRISD4

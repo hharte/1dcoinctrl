@@ -40,6 +40,7 @@
 #include  <ctype.h>
 
 #include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/examples/i2c1_master_example.h"
 
 //#define DEBUG
 
@@ -56,8 +57,10 @@
 #define COLLECT             TRUE
 #define INITIAL_RATE        TRUE
 #define STUCK_COIN          FALSE
-#define OFF_HOOK            FALSE
-#define ON_HOOK             TRUE
+
+#define ON_HOOK             (0)
+#define OFF_HOOK_F          (1)
+#define OFF_HOOK_R          (2)
 
 
 #define LED_ON              //IO_RD0_SetHigh()
@@ -86,10 +89,19 @@
 #define L4_COIN_CTRL_OFF    L4_COIN_CONTROL_SetLow()
 
 #define TEST_STATUS         TEST_STATUS_GetValue()
-#define L1_OFF_HOOK         L1_OFF_HOOK_GetValue()
-#define L2_OFF_HOOK         L2_OFF_HOOK_GetValue()
-#define L3_OFF_HOOK         L3_OFF_HOOK_GetValue()
-#define L4_OFF_HOOK         L4_OFF_HOOK_GetValue()
+
+#define MCP23008_BASE       (0x20)
+#define MCP23008_IODIR      (0x00)
+#define MCP23008_IPOL       (0x01)
+#define MCP23008_GPINTEN    (0x02)
+#define MCP23008_DEFVAL     (0x03)
+#define MCP23008_INTCON     (0x04)
+#define MCP23008_IOCON      (0x05)
+#define MCP23008_GPPU       (0x06)
+#define MCP23008_INTF       (0x07)
+#define MCP23008_INTCAP     (0x08)
+#define MCP23008_GPIO       (0x09)
+#define MCP23008_OLAT       (0x0A)
 
 #ifdef DEBUG
 #define DBG_PRINT(x) printf x
@@ -109,8 +121,11 @@ const char          menu[] = "ATC Collect coin\n\r" \
                              "\n> ";
 
 volatile uint32_t timer_tick = 0;
+volatile uint32_t int2_count = 0;
+volatile uint8_t cur_hook_state = 0;
 
 static void delay_ms(uint16_t ms);
+void hook_state_ISR(void);
 void TIMER0_ISR(void);
 static void set_line_hold(uint8_t coin_line, uint8_t state);
 static uint8_t read_hook_state(uint8_t coin_line);
@@ -118,6 +133,9 @@ static void do_coin_ctrl(uint8_t coin_line, uint8_t state);
 static void collect_coin(uint8_t coin_line, uint8_t collect);
 static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate);
 static void print_version(void);
+static void coinctrl_reset(void);
+static uint8_t MCP23008_Read(uint8_t reg);
+static uint8_t MCP23008_Write(uint8_t reg, uint8_t val);
 
 uint8_t coinctrl_main(void)
 {
@@ -127,21 +145,14 @@ uint8_t coinctrl_main(void)
     char len = 0;
     char i;
 
-    /* Initialize 10ms tick timer. */
+    /* Initialize the 1ms tick timer. */
     TMR0_Initialize();
     TMR0_SetInterruptHandler(TIMER0_ISR);
     TMR0_StartTimer();
 
-    /* Make sure all relays are off initially. */
-    REFUND_OFF;
-    DISPOSITION_OFF;
+    INT2_SetInterruptHandler(hook_state_ISR);
 
-    for (coin_line = 1; coin_line <= COIN_LINE_MAX; coin_line++) {
-        DBG_PRINT(("Release coin line %d\n\r", coin_line));
-//        do_coin_ctrl(coin_line, REFUND);
-        set_line_hold(coin_line, RELEASE);
-    }
-
+    coinctrl_reset();
     coin_line = 1;                      // Set default coin_line
 
     while (1) {
@@ -149,7 +160,7 @@ uint8_t coinctrl_main(void)
         DBG_PRINT(("Timer_tick: %lu, Current Line: %d, hook state: %s\n\r",
                 timer_tick,
                 coin_line,
-                read_hook_state(coin_line) ? "ON Hook" : "OFF Hook"));
+                read_hook_state(coin_line) ? "OFF Hook" : "ON Hook"));
 
         while (c != '\r') {
             c = getch();
@@ -202,7 +213,7 @@ uint8_t coinctrl_main(void)
                 printf("%d\n\r", test_coin(coin_line, STUCK_COIN));
                 break;
             case 'Q':
-                printf("%d\n\r", read_hook_state(coin_line) == OFF_HOOK ? 1 : 0);
+                printf("%d\n\r", read_hook_state(coin_line));
                 break;
             case 'E':
                 for (i = 0; i < 100 ; i++) {
@@ -211,7 +222,10 @@ uint8_t coinctrl_main(void)
                     delay_ms(1000);
                 }
                 break;
-            case 'Z':
+            case 'Z': /* Reset */
+                coinctrl_reset();
+                coin_line = 1;  // Set default coin_line
+                /* Fall through */
             case 0:
                 printf("OK\n\r");
                 break;
@@ -230,7 +244,7 @@ uint8_t coinctrl_main(void)
 
 static void print_version(void)
 {
-    printf("\n\rWestern Electric 1D Coin Controller Firmware v1.0\n\r" \
+    printf("\n\rWestern Electric 1D Coin Controller Iss 2 Firmware v1.0\n\r" \
            "(c) 2020 Howard M. Harte, WZ2Q\n\r" \
            "http://github.com/hharte/1dcoinctrl\n\r");
 }
@@ -239,9 +253,7 @@ static void delay_ms(uint16_t ms)
 {
     uint32_t end_time;
     
-    if (ms < 10) ms = 10;
-    
-    end_time = timer_tick + (ms / 10);
+    end_time = timer_tick + ms;
     
     while (timer_tick < end_time);
 }
@@ -249,6 +261,12 @@ static void delay_ms(uint16_t ms)
 void TIMER0_ISR(void)
 {
     timer_tick++;
+}
+
+void hook_state_ISR(void)
+{
+    int2_count++;
+    cur_hook_state = MCP23008_Read(MCP23008_GPIO);
 }
 
 static void set_line_hold(uint8_t coin_line, uint8_t state)
@@ -276,27 +294,19 @@ static void set_line_hold(uint8_t coin_line, uint8_t state)
 
 }
 
+#define HOOK_BITS_SHIFT     ((coin_line - 1) << 1)
+#define HOOK_BITS_MASK      (0x03)
 static uint8_t read_hook_state(uint8_t coin_line)
 {
-    switch (coin_line) {
-    case 1:
-        return L1_OFF_HOOK;
-        break;
-    case 2:
-        return L2_OFF_HOOK;
-        break;
-    case 3:
-        return L3_OFF_HOOK;
-        break;
-    case 4:
-        return L4_OFF_HOOK;
-        break;
-    default:
-        DBG_PRINT(("Invalid coin_line %d selected.\n\r", coin_line));
-        break;
+    uint8_t gpio;
+
+    if (coin_line > COIN_LINE_MAX) {
+        return 0;
     }
 
-    return FALSE;
+    gpio = cur_hook_state;
+
+    return ((gpio >> HOOK_BITS_SHIFT) & HOOK_BITS_MASK);
 }
 
 static void do_coin_ctrl(uint8_t coin_line, uint8_t state)
@@ -334,7 +344,7 @@ static void collect_coin(uint8_t coin_line, uint8_t collect)
     hook_state = read_hook_state(coin_line);
     
     /* Put coin_line on hold if it is off hook. */
-    if (hook_state == OFF_HOOK) {
+    if (hook_state != ON_HOOK) {
         set_line_hold(coin_line, TRUE);
     }
     
@@ -359,7 +369,7 @@ static void collect_coin(uint8_t coin_line, uint8_t collect)
     REFUND_OFF;
     DISPOSITION_OFF;
 
-    if (hook_state == OFF_HOOK) {
+    if (hook_state != ON_HOOK) {
         /* Take coin_line off hold. */
         set_line_hold(coin_line, FALSE);
     }
@@ -377,9 +387,8 @@ static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate)
     hook_state = read_hook_state(coin_line);
     
     /* Put CO on hold if the coin collector is off hook. */
-    if (hook_state == OFF_HOOK) {
+    if (hook_state != ON_HOOK) {
         set_line_hold(coin_line, TRUE);
-        delay_ms(100);
     }
     
     /* Set REFUND relay */
@@ -397,16 +406,56 @@ static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate)
     
     do_coin_ctrl(coin_line, FALSE);
     
-    delay_ms(100);
-    
     /* Turn REFUND relay off */
     REFUND_OFF;
 
-    if (hook_state == OFF_HOOK) {
-        delay_ms(100);
+    if (hook_state != ON_HOOK) {
         /* Remove CO hold. */
         set_line_hold(coin_line, FALSE);
     }
     
     return (result);
+}
+
+static void coinctrl_reset(void)
+{
+    uint8_t coin_line;
+
+    EXT_INT2_InterruptDisable();
+
+    /* Reset the MCP23008 I/O Expander */
+    I2C_RESET_N_SetLow();
+
+    /* Make sure all relays are off initially. */
+    REFUND_OFF;
+    DISPOSITION_OFF;
+
+    for (coin_line = 1; coin_line <= COIN_LINE_MAX; coin_line++) {
+        DBG_PRINT(("Release coin line %d\n\r", coin_line));
+        set_line_hold(coin_line, RELEASE);
+    }
+
+    /* Take the MCP23008 I/O Expander out of reset. */
+    I2C_RESET_N_SetHigh();
+
+    /* Configure MCP23008 I/O Expander */
+    MCP23008_Write(MCP23008_GPPU, 0xFF);    /* Enable pull-ups */
+    MCP23008_Write(MCP23008_IPOL, 0xFF);    /* Invert input polarity */
+    MCP23008_Write(MCP23008_IOCON, 0x02);   /* Active High Interrupt. */
+    MCP23008_Write(MCP23008_GPINTEN, 0xFF); /* Interrupt on change. */
+
+    EXT_INT2_InterruptEnable();
+}
+
+static uint8_t MCP23008_Read(uint8_t reg)
+{
+    uint8_t val = 0;
+    val = I2C1_Read1ByteRegister(MCP23008_BASE, reg);
+    return val;
+}
+
+static uint8_t MCP23008_Write(uint8_t reg, uint8_t val)
+{
+    I2C1_Write1ByteRegister(MCP23008_BASE, reg, val);
+    return 0;
 }
