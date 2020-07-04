@@ -62,7 +62,6 @@
 #define OFF_HOOK_F          (1)
 #define OFF_HOOK_R          (2)
 
-
 #define LED_ON              //IO_RD0_SetHigh()
 #define LED_OFF             //IO_RD0_SetLow()
 
@@ -122,11 +121,35 @@ const char          menu[] = "ATC Collect coin\n\r" \
 
 volatile uint32_t timer_tick = 0;
 volatile uint32_t int2_count = 0;
-volatile uint8_t cur_hook_state = 0;
+
+typedef struct pulse_entry {
+    uint16_t pulse_duration;
+    uint8_t hook_state;
+} pulse_entry_t;
+
+#define PULSE_LIST_ENTRIES_MAX  32  /* Must be a power of 2! */
+
+typedef struct hook_switch_context {
+    uint8_t wptr;
+    uint8_t rptr;
+    pulse_entry_t pulse_list[PULSE_LIST_ENTRIES_MAX];
+    uint32_t last_tick;
+} hook_switch_context_t;
+
+typedef struct digit_fifo {
+    uint8_t wptr;
+    uint8_t rptr;
+    uint8_t dialed_digit[PULSE_LIST_ENTRIES_MAX];
+} digit_fifo_t;
+
+digit_fifo_t dialed_digits = { 0 };
+
+hook_switch_context_t hs_context[COIN_LINE_MAX] = { 0 };
 
 static void delay_ms(uint16_t ms);
-void hook_state_ISR(void);
 void TIMER0_ISR(void);
+void hook_state_ISR(void);
+void process_coin_lines(void);
 static void set_line_hold(uint8_t coin_line, uint8_t state);
 static uint8_t read_hook_state(uint8_t coin_line);
 static void do_coin_ctrl(uint8_t coin_line, uint8_t state);
@@ -157,11 +180,6 @@ uint8_t coinctrl_main(void)
 
     while (1) {
 
-        DBG_PRINT(("Timer_tick: %lu, Current Line: %d, hook state: %s\n\r",
-                timer_tick,
-                coin_line,
-                read_hook_state(coin_line) ? "OFF Hook" : "ON Hook"));
-
         while (c != '\r') {
             c = getch();
 
@@ -176,7 +194,7 @@ uint8_t coinctrl_main(void)
             }
         }
         atcmd[len - 1 ] = 0;
-        printf("\n\r");
+        puts("\r");
         c = 0;
         len = 0;
 
@@ -187,21 +205,49 @@ uint8_t coinctrl_main(void)
             }
 
             switch (atcmd[2]) {
+            case 'D': /* Dump current state. */
+                printf("Timer_tick: %lu, Current Line: %d, hook state: %d, dialed_digit: 0x%02x, INT2 count: %lu\n\r",
+                        timer_tick,
+                        coin_line,
+                        read_hook_state(coin_line),
+                        dialed_digits.dialed_digit[dialed_digits.rptr],
+                        int2_count);
+
+                while(hs_context[0].rptr != hs_context[0].wptr) {
+                    printf("%d: [%u ms] 0x%02x\n\r", hs_context[0].rptr,
+                            hs_context[0].pulse_list[hs_context[0].rptr].pulse_duration,
+                            hs_context[0].pulse_list[hs_context[0].rptr].hook_state);
+                    hs_context[0].rptr++;
+                    hs_context[0].rptr &= (PULSE_LIST_ENTRIES_MAX - 1);
+                }
+
+                if (dialed_digits.rptr != dialed_digits.wptr) {
+                    puts("\n\rDialed Digits:\r");
+                }
+
+                while (dialed_digits.rptr != dialed_digits.wptr) {
+                    printf("%d, ", dialed_digits.dialed_digit[dialed_digits.rptr]);
+                    dialed_digits.rptr++;
+                    dialed_digits.rptr &= (PULSE_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
+                }
+
+                puts("\n\rOK\r");
+                break;
             case 'H':
                 set_line_hold(coin_line, HOLD);
-                puts("OK\n\r");
+                puts("OK\r");
                 break;
             case 'U':
                 set_line_hold(coin_line, RELEASE);
-                puts("OK\n\r");
+                puts("OK\r");
                 break;
             case 'C':
                 collect_coin(coin_line, COLLECT);
-                printf("OK\n\r");
+                puts("OK\r");
                 break;
             case 'R':
                 collect_coin(coin_line, REFUND);
-                printf("OK\n\r");
+                puts("OK\r");
                 break;
             case 'I':
                 printf("%d\n\r", test_coin(coin_line, INITIAL_RATE));
@@ -227,13 +273,13 @@ uint8_t coinctrl_main(void)
                 coin_line = 1;  // Set default coin_line
                 /* Fall through */
             case 0:
-                printf("OK\n\r");
+                puts("OK\r");
                 break;
             case '?':
                 printf(menu);
                 break;
             default:
-                printf("ERROR\n\r");
+                puts("ERROR\r");
                 break;
             }
         }
@@ -261,12 +307,60 @@ static void delay_ms(uint16_t ms)
 void TIMER0_ISR(void)
 {
     timer_tick++;
+    uint32_t time_delta;
+
+    time_delta = timer_tick - hs_context[0].last_tick;
+
+    /* if more than 100ms has passed since the last hook state interrupt,
+     * call the hook_state_ISR() to process the last pulse.
+     */
+    if (time_delta > 100) {
+        hook_state_ISR();
+    }
 }
 
 void hook_state_ISR(void)
 {
+    uint32_t time_delta;
+    uint8_t hook_state;
+    static uint32_t on_hook_start_time = 0;
+    uint16_t on_hook_pulse_duration = 0;
+    static uint8_t current_digit = 0;
+
+    time_delta = timer_tick - hs_context[0].last_tick;
+    hs_context[0].last_tick = timer_tick;
+
     int2_count++;
-    cur_hook_state = MCP23008_Read(MCP23008_GPIO);
+
+    hook_state = MCP23008_Read(MCP23008_GPIO);
+
+    if (hook_state == ON_HOOK) {
+        on_hook_start_time = timer_tick;
+    } else {
+        on_hook_pulse_duration = timer_tick - on_hook_start_time;
+    }
+
+    /* Process dial pulses... */
+    if (on_hook_pulse_duration < 30) {
+        /* Ignore glitches */
+    } else if (on_hook_pulse_duration <= 80) {
+        /* If the pulse is less than 80ms, it must be a dial pulse. */
+        current_digit++;
+    } else if (current_digit > 0) {
+        /* If we received a dialed digit, and the pulse duration is more than 80ms,
+         * add the digit to the dialed_digits FIFO.
+         */
+        dialed_digits.dialed_digit[dialed_digits.wptr] = current_digit;
+        dialed_digits.wptr++;
+        dialed_digits.wptr &= (PULSE_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
+        current_digit = 0;
+    }
+
+    /* Store the pulse details in a circular buffer for debugging. */
+    hs_context[0].pulse_list[hs_context[0].wptr].pulse_duration = on_hook_pulse_duration;
+    hs_context[0].pulse_list[hs_context[0].wptr].hook_state = hook_state;
+    hs_context[0].wptr++;
+    hs_context[0].wptr &= (PULSE_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
 }
 
 static void set_line_hold(uint8_t coin_line, uint8_t state)
@@ -303,8 +397,7 @@ static uint8_t read_hook_state(uint8_t coin_line)
     if (coin_line > COIN_LINE_MAX) {
         return 0;
     }
-
-    gpio = cur_hook_state;
+    gpio = hs_context[0].pulse_list[(hs_context[0].wptr - 1) & (PULSE_LIST_ENTRIES_MAX - 1)].hook_state;
 
     return ((gpio >> HOOK_BITS_SHIFT) & HOOK_BITS_MASK);
 }
@@ -401,7 +494,7 @@ static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate)
     /* Apply Coin Control Relay and check status of the TEST_STATUS input */
     do_coin_ctrl(coin_line, TRUE);
     delay_ms(100);
-    
+
     result = (TEST_STATUS == 0);
     
     do_coin_ctrl(coin_line, FALSE);
