@@ -28,6 +28,7 @@ This project is based on another open-source project (see References below) and 
 3. The ability to count dial pulses from Rotary payphones and provide the digits out-of-band to Asterisk.
 4. The ability to be [red-boxed](http://en.wikipedia.org/wiki/Red_box_(phreaking)).
 
+![alt_text](https://raw.githubusercontent.com/hharte/1dcoinctrl/master/photos/1dcoinctrl_iss2.jpg "image_tooltip")
 
 ## Pay phone
 
