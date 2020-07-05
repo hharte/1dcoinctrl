@@ -128,21 +128,22 @@ typedef struct pulse_entry {
 } pulse_entry_t;
 
 #define PULSE_LIST_ENTRIES_MAX  32  /* Must be a power of 2! */
-
-typedef struct hook_switch_context {
-    uint8_t wptr;
-    uint8_t rptr;
-    pulse_entry_t pulse_list[PULSE_LIST_ENTRIES_MAX];
-    uint32_t last_tick;
-} hook_switch_context_t;
+#define DIGIT_LIST_ENTRIES_MAX  16  /* Must be a power of 2! */
 
 typedef struct digit_fifo {
     uint8_t wptr;
     uint8_t rptr;
-    uint8_t dialed_digit[PULSE_LIST_ENTRIES_MAX];
+    uint8_t dialed_digit[DIGIT_LIST_ENTRIES_MAX];
+    uint8_t current_digit;
 } digit_fifo_t;
 
-digit_fifo_t dialed_digits = { 0 };
+typedef struct hook_switch_context {
+    uint32_t last_tick;
+    uint8_t wptr;
+    uint8_t rptr;
+    pulse_entry_t pulse_list[PULSE_LIST_ENTRIES_MAX];
+    digit_fifo_t digits;
+} hook_switch_context_t;
 
 hook_switch_context_t hs_context[COIN_LINE_MAX] = { 0 };
 
@@ -162,6 +163,7 @@ static uint8_t MCP23008_Write(uint8_t reg, uint8_t val);
 
 uint8_t coinctrl_main(void)
 {
+    hook_switch_context_t *pHS;
     uint8_t coin_line = 1;
     char c = 0;
     char atcmd[80];
@@ -210,28 +212,32 @@ uint8_t coinctrl_main(void)
                         timer_tick,
                         coin_line,
                         read_hook_state(coin_line),
-                        dialed_digits.dialed_digit[dialed_digits.rptr],
+                        hs_context[coin_line - 1].digits.dialed_digit[hs_context[coin_line - 1].digits.rptr],
                         int2_count);
 
-                while(hs_context[0].rptr != hs_context[0].wptr) {
-                    printf("%d: [%u ms] 0x%02x\n\r", hs_context[0].rptr,
-                            hs_context[0].pulse_list[hs_context[0].rptr].pulse_duration,
-                            hs_context[0].pulse_list[hs_context[0].rptr].hook_state);
-                    hs_context[0].rptr++;
-                    hs_context[0].rptr &= (PULSE_LIST_ENTRIES_MAX - 1);
-                }
+                for (i = 0; i < COIN_LINE_MAX; i++) {
+                    pHS = &hs_context[i];
+                    while(pHS->rptr != pHS->wptr) {
+                        printf("%d: [%u ms] 0x%02x\n\r", hs_context[i].rptr,
+                                pHS->pulse_list[pHS->rptr].pulse_duration,
+                                pHS->pulse_list[pHS->rptr].hook_state);
+                        pHS->rptr++;
+                        pHS->rptr &= (PULSE_LIST_ENTRIES_MAX - 1);
+                    }
 
-                if (dialed_digits.rptr != dialed_digits.wptr) {
-                    puts("\n\rDialed Digits:\r");
-                }
+                    if (pHS->digits.rptr == pHS->digits.wptr) {
+                        continue;
+                    }
+                    printf("\n\rLine %d dialed digits: ", i + 1);
 
-                while (dialed_digits.rptr != dialed_digits.wptr) {
-                    printf("%d, ", dialed_digits.dialed_digit[dialed_digits.rptr]);
-                    dialed_digits.rptr++;
-                    dialed_digits.rptr &= (PULSE_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
+                    while (pHS->digits.rptr != pHS->digits.wptr) {
+                        printf("%d, ", pHS->digits.dialed_digit[pHS->digits.rptr]);
+                        pHS->digits.rptr++;
+                        pHS->digits.rptr &= (DIGIT_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
+                    }
+                    puts("\r");
                 }
-
-                puts("\n\rOK\r");
+                puts("\rOK\r");
                 break;
             case 'H':
                 set_line_hold(coin_line, HOLD);
@@ -304,63 +310,96 @@ static void delay_ms(uint16_t ms)
     while (timer_tick < end_time);
 }
 
+/* The TIMER0_ISR must be higher-priority than the INT2 ISR. */
 void TIMER0_ISR(void)
 {
-    timer_tick++;
+    hook_switch_context_t *pHS;
     uint32_t time_delta;
+    uint8_t coin_line;
 
-    time_delta = timer_tick - hs_context[0].last_tick;
+    timer_tick++;
 
-    /* if more than 100ms has passed since the last hook state interrupt,
-     * call the hook_state_ISR() to process the last pulse.
-     */
-    if (time_delta > 100) {
-        hook_state_ISR();
+    for (coin_line = 0; coin_line < COIN_LINE_MAX; coin_line++) {
+        pHS = &hs_context[coin_line];
+
+        /* Calculate the time since the last pulse. */
+        time_delta = timer_tick - pHS->last_tick;
+
+        /* If more than 100ms has passed since the last hook state interrupt,
+         * we may need to add the current_digit to the dialed_digits FIFO.
+         */
+        if (time_delta > 100) {
+            if (pHS->digits.current_digit != 0) {
+                pHS->digits.dialed_digit[pHS->digits.wptr] = pHS->digits.current_digit;
+                pHS->digits.wptr++;
+                pHS->digits.wptr &= (DIGIT_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
+                pHS->digits.current_digit = 0;
+            }
+        }
     }
 }
 
 void hook_state_ISR(void)
 {
     uint32_t time_delta;
+    hook_switch_context_t *pHS;
     uint8_t hook_state;
-    static uint32_t on_hook_start_time = 0;
-    uint16_t on_hook_pulse_duration = 0;
-    static uint8_t current_digit = 0;
-
-    time_delta = timer_tick - hs_context[0].last_tick;
-    hs_context[0].last_tick = timer_tick;
+    uint8_t coin_line;
+    uint8_t coin_line_hook_state;
+    uint8_t prev_coin_line_hook_state;
+    static uint8_t prev_hook_state = 0;
+    static uint32_t on_hook_start_time[COIN_LINE_MAX] = { 0 };
+    uint16_t on_hook_pulse_duration;
+    static uint32_t off_hook_start_time[COIN_LINE_MAX] = { 0 };
+    uint16_t off_hook_pulse_duration;
 
     int2_count++;
 
     hook_state = MCP23008_Read(MCP23008_GPIO);
 
-    if (hook_state == ON_HOOK) {
-        on_hook_start_time = timer_tick;
-    } else {
-        on_hook_pulse_duration = timer_tick - on_hook_start_time;
+    for (coin_line = 0; coin_line < COIN_LINE_MAX; coin_line++) {
+        pHS = &hs_context[coin_line];
+
+        coin_line_hook_state = (hook_state >> (coin_line << 1)) & 0x03;
+        prev_coin_line_hook_state = (prev_hook_state >> (coin_line << 1)) & 0x03;
+
+        if (prev_coin_line_hook_state == coin_line_hook_state) {
+            continue;
+        }
+
+        time_delta = timer_tick - pHS->last_tick;
+        pHS->last_tick = timer_tick;
+
+        if (coin_line_hook_state == ON_HOOK) {
+            on_hook_start_time[coin_line] = timer_tick;
+            on_hook_pulse_duration = 0;
+            off_hook_pulse_duration = timer_tick - off_hook_start_time[coin_line];
+            pHS->pulse_list[pHS->wptr].pulse_duration = off_hook_pulse_duration;
+        } else { /* OFF_HOOK */
+            off_hook_start_time[coin_line] = timer_tick;
+            off_hook_pulse_duration = 0;
+            on_hook_pulse_duration = timer_tick - on_hook_start_time[coin_line];
+            pHS->pulse_list[pHS->wptr].pulse_duration = on_hook_pulse_duration;
+        }
+
+        /* Store the pulse details in a circular buffer for debugging. */
+        pHS->pulse_list[pHS->wptr].hook_state = hook_state;
+        pHS->wptr++;
+        pHS->wptr &= (PULSE_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
+
+        /* Process dial pulses:
+         * In the United States, digits are dialed at 10 pulses-per-
+         * second, with a 39% make to 61% break ratio. */
+        if (on_hook_pulse_duration < 30) {
+            /* Ignore glitches */
+            continue;
+        } else if (on_hook_pulse_duration <= 80) {
+            /* If the pulse is less than 80ms, it must be a dial pulse. */
+            pHS->digits.current_digit++;
+        }
     }
 
-    /* Process dial pulses... */
-    if (on_hook_pulse_duration < 30) {
-        /* Ignore glitches */
-    } else if (on_hook_pulse_duration <= 80) {
-        /* If the pulse is less than 80ms, it must be a dial pulse. */
-        current_digit++;
-    } else if (current_digit > 0) {
-        /* If we received a dialed digit, and the pulse duration is more than 80ms,
-         * add the digit to the dialed_digits FIFO.
-         */
-        dialed_digits.dialed_digit[dialed_digits.wptr] = current_digit;
-        dialed_digits.wptr++;
-        dialed_digits.wptr &= (PULSE_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
-        current_digit = 0;
-    }
-
-    /* Store the pulse details in a circular buffer for debugging. */
-    hs_context[0].pulse_list[hs_context[0].wptr].pulse_duration = on_hook_pulse_duration;
-    hs_context[0].pulse_list[hs_context[0].wptr].hook_state = hook_state;
-    hs_context[0].wptr++;
-    hs_context[0].wptr &= (PULSE_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
+    prev_hook_state = hook_state;
 }
 
 static void set_line_hold(uint8_t coin_line, uint8_t state)
