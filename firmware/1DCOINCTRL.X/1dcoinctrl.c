@@ -575,7 +575,6 @@ static void coinctrl_reset(void)
     /* Configure MCP23008 I/O Expander */
     MCP23008_Write(MCP23008_GPPU, 0xFF);    /* Enable pull-ups */
     MCP23008_Write(MCP23008_IPOL, 0xFF);    /* Invert input polarity */
-    MCP23008_Write(MCP23008_IOCON, 0x02);   /* Active High Interrupt. */
     MCP23008_Write(MCP23008_GPINTEN, 0xFF); /* Interrupt on change. */
 
     EXT_INT2_InterruptEnable();

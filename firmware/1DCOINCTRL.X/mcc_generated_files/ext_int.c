@@ -62,7 +62,7 @@ void EXT_INT_Initialize(void)
     // Clear the interrupt flag
     // Set the external interrupt edge detect
     EXT_INT2_InterruptFlagClear();   
-    EXT_INT2_risingEdgeSet();    
+    EXT_INT2_fallingEdgeSet();    
     // Set Default Interrupt Handler
     INT2_SetInterruptHandler(INT2_DefaultInterruptHandler);
     EXT_INT2_InterruptEnable();      

@@ -116,7 +116,7 @@ extern "C" {
     // clear the interrupt enable
     EXT_INT2_InterruptDisable();
     // change the edge
-    EXT_INT2_risingEdgeSet();
+    EXT_INT2_fallingEdgeSet();
     // clear the interrupt flag and re-enable the interrupt
     EXT_INT2_InterruptFlagClear();
     EXT_INT2_InterruptEnable();
@@ -147,7 +147,7 @@ extern "C" {
     Setting the external interrupt to handle positive edge interrupts
     <code>
     // set the edge
-    EXT_INT2_risingEdgeSet();
+    EXT_INT2_fallingEdgeSet();
     // clear the interrupt flag and enable the interrupt
     EXT_INT2_InterruptFlagClear();
     EXT_INT2_InterruptEnable();
@@ -178,7 +178,7 @@ extern "C" {
     Setting the external interrupt to handle negative edge interrupts
     <code>
     // set the edge
-    EXT_INT2_risingEdgeSet();
+    EXT_INT2_fallingEdgeSet();
     // clear the interrupt flag and enable the interrupt
     EXT_INT2_InterruptFlagClear();
     EXT_INT2_InterruptEnable();
@@ -209,7 +209,7 @@ extern "C" {
     Setting the external interrupt to handle positive edge interrupts
     <code>
     // set the edge
-    EXT_INT2_risingEdgeSet();
+    EXT_INT2_fallingEdgeSet();
     // clear the interrupt flag and enable the interrupt
     EXT_INT2_InterruptFlagClear();
     EXT_INT2_InterruptEnable();
