@@ -164,7 +164,7 @@ static uint8_t MCP23008_Write(uint8_t reg, uint8_t val);
 uint8_t coinctrl_main(void)
 {
     hook_switch_context_t *pHS;
-    uint8_t coin_line = 1;
+    uint8_t coin_line;
     char c = 0;
     char atcmd[80];
     char len = 0;
@@ -178,7 +178,7 @@ uint8_t coinctrl_main(void)
     INT2_SetInterruptHandler(hook_state_ISR);
 
     coinctrl_reset();
-    coin_line = 1;                      // Set default coin_line
+    coin_line = 0;                      // Set default coin_line
 
     while (1) {
 
@@ -202,15 +202,18 @@ uint8_t coinctrl_main(void)
 
         if (atcmd[0] == 'A' && atcmd[1] == 'T') {
 
-            if (atcmd[3] >= '1' && atcmd[3] <= (COIN_LINE_MAX + '0')) {
-                coin_line = atcmd[3] - '0';
+            if (atcmd[3] >= '1' && atcmd[3] < (COIN_LINE_MAX + '1')) {
+                coin_line = atcmd[3] - '1';
+            } else if (atcmd[3] != 0) {
+                puts("ERROR\r");
+                continue;
             }
 
             switch (atcmd[2]) {
             case 'D': /* Dump current state. */
                 printf("Timer_tick: %lu, Current Line: %d, hook state: %d, dialed_digit: 0x%02x, INT2 count: %lu\n\r",
                         timer_tick,
-                        coin_line,
+                        coin_line + 1,
                         read_hook_state(coin_line),
                         hs_context[coin_line - 1].digits.dialed_digit[hs_context[coin_line - 1].digits.rptr],
                         int2_count);
@@ -276,7 +279,7 @@ uint8_t coinctrl_main(void)
                 break;
             case 'Z': /* Reset */
                 coinctrl_reset();
-                coin_line = 1;  // Set default coin_line
+                coin_line = 0;  // Set default coin_line
                 /* Fall through */
             case 0:
                 puts("OK\r");
@@ -404,23 +407,23 @@ void hook_state_ISR(void)
 
 static void set_line_hold(uint8_t coin_line, uint8_t state)
 {
-    if (coin_line > COIN_LINE_MAX) {
+    if (coin_line >= COIN_LINE_MAX) {
         DBG_PRINT(("Invalid coin_line %d selected.\n\r", coin_line));
         return;
     }
 
     DBG_PRINT(("%s coin_line %d\n\r", state ? "Holding" : "Releasing", coin_line));
     switch (coin_line) {
-    case 1:
+    case 0:
         if (state == TRUE) L1_HOLD_ON; else L1_HOLD_OFF;
         break;
-    case 2:
+    case 1:
         if (state == TRUE) L2_HOLD_ON; else L2_HOLD_OFF;
         break;
-    case 3:
+    case 2:
         if (state == TRUE) L3_HOLD_ON; else L3_HOLD_OFF;
         break;
-    case 4:
+    case 3:
         if (state == TRUE) L4_HOLD_ON; else L4_HOLD_OFF;
         break;
     }
@@ -444,7 +447,7 @@ static uint8_t read_hook_state(uint8_t coin_line)
 static void do_coin_ctrl(uint8_t coin_line, uint8_t state)
 {
     
-    if (coin_line > COIN_LINE_MAX) {
+    if (coin_line >= COIN_LINE_MAX) {
         DBG_PRINT(("Invalid coin_line %d selected.\n\r", coin_line));
         return;
     }
@@ -452,16 +455,16 @@ static void do_coin_ctrl(uint8_t coin_line, uint8_t state)
     DBG_PRINT(("%s coin_line %d Coin Control\n\r", state ? "Enable" : "Disable", coin_line));
 
     switch (coin_line) {
-    case 1:
+    case 0:
         if (state == TRUE) L1_COIN_CTRL_ON; else L1_COIN_CTRL_OFF;
         break;
-    case 2:
+    case 1:
         if (state == TRUE) L2_COIN_CTRL_ON; else L2_COIN_CTRL_OFF;
         break;
-    case 3:
+    case 2:
         if (state == TRUE) L3_COIN_CTRL_ON; else L3_COIN_CTRL_OFF;
         break;
-    case 4:
+    case 3:
         if (state == TRUE) L4_COIN_CTRL_ON; else L4_COIN_CTRL_OFF;
         break;
     }
@@ -470,7 +473,6 @@ static void do_coin_ctrl(uint8_t coin_line, uint8_t state)
 /* Collect or refund the coin in the hopper. */
 static void collect_coin(uint8_t coin_line, uint8_t collect)
 {
-    volatile uint24_t n;
     uint8_t hook_state;
     
     hook_state = read_hook_state(coin_line);
@@ -562,7 +564,7 @@ static void coinctrl_reset(void)
     REFUND_OFF;
     DISPOSITION_OFF;
 
-    for (coin_line = 1; coin_line <= COIN_LINE_MAX; coin_line++) {
+    for (coin_line = 0; coin_line < COIN_LINE_MAX; coin_line++) {
         DBG_PRINT(("Release coin line %d\n\r", coin_line));
         set_line_hold(coin_line, RELEASE);
     }
