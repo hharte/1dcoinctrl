@@ -473,14 +473,8 @@ static void do_coin_ctrl(uint8_t coin_line, uint8_t state)
 /* Collect or refund the coin in the hopper. */
 static void collect_coin(uint8_t coin_line, uint8_t collect)
 {
-    uint8_t hook_state;
-    
-    hook_state = read_hook_state(coin_line);
-    
-    /* Put coin_line on hold if it is off hook. */
-    if (hook_state != ON_HOOK) {
-        set_line_hold(coin_line, TRUE);
-    }
+    /* Put CO on hold. */
+    set_line_hold(coin_line, TRUE);
     
     /* Set REFUND relay off */
     if (collect) {
@@ -502,28 +496,22 @@ static void collect_coin(uint8_t coin_line, uint8_t collect)
     /* Turn DISPOSITION relay off */
     REFUND_OFF;
     DISPOSITION_OFF;
+    delay_ms(100);   /* Wait for relays to settle. */
 
-    if (hook_state != ON_HOOK) {
-        /* Take coin_line off hold. */
-        set_line_hold(coin_line, FALSE);
-    }
+    /* Take coin_line off hold. */
+    set_line_hold(coin_line, FALSE);
 }
 
 /* Test for stuck coin or initial rate */
 static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate)
 {
-    uint8_t hook_state;
     uint8_t result;
 
     /* Set DISPOSITION relay off (selects test mode) */
     DISPOSITION_OFF;
     
-    hook_state = read_hook_state(coin_line);
-    
-    /* Put CO on hold if the coin collector is off hook. */
-    if (hook_state != ON_HOOK) {
-        set_line_hold(coin_line, TRUE);
-    }
+    /* Put CO on hold. */
+    set_line_hold(coin_line, TRUE);
     
     /* Set REFUND relay */
     if (initial_rate) {
@@ -534,7 +522,7 @@ static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate)
 
     /* Apply Coin Control Relay and check status of the TEST_STATUS input */
     do_coin_ctrl(coin_line, TRUE);
-    delay_ms(100);
+    delay_ms(50);   /* Wait for test status to settle. */
 
     result = (TEST_STATUS == 0);
     
@@ -543,10 +531,10 @@ static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate)
     /* Turn REFUND relay off */
     REFUND_OFF;
 
-    if (hook_state != ON_HOOK) {
-        /* Remove CO hold. */
-        set_line_hold(coin_line, FALSE);
-    }
+    delay_ms(100);   /* Wait for relays to settle. */
+
+    /* Remove CO hold. */
+    set_line_hold(coin_line, FALSE);
     
     return (result);
 }
