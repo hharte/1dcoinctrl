@@ -13,12 +13,12 @@
   @Description:
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
-        Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.78.1
-        Device            :  PIC18F45K50
+        Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
+        Device            :  PIC18F47Q84
         Driver Version    :  2.00
     The generated drivers are tested against the following:
-        Compiler          :  XC8 2.10 and above or later
-        MPLAB             :  MPLAB X 5.30
+        Compiler          :  XC8 2.36 and above or later
+        MPLAB             :  MPLAB X 6.00
 */
 
 /*
@@ -46,68 +46,117 @@
 
 // Configuration bits: selected in the GUI
 
-// CONFIG1L
-#pragma config PLLSEL = PLL3X    // PLL Selection->3x clock multiplier
-#pragma config CFGPLLEN = ON    // PLL Enable Configuration bit->PLL Enabled
-#pragma config CPUDIV = NOCLKDIV    // CPU System Clock Postscaler->CPU uses system clock (no divide)
-#pragma config LS48MHZ = SYS48X8    // Low Speed USB mode with 48 MHz system clock->System clock at 48 MHz, USB clock divider is set to 8
+// CONFIG1
+#pragma config FEXTOSC = OFF    // External Oscillator Selection->Oscillator not enabled
+#pragma config RSTOSC = HFINTOSC_64MHZ    // Reset Oscillator Selection->HFINTOSC with HFFRQ = 64 MHz and CDIV = 1:1
 
-// CONFIG1H
-#pragma config FOSC = INTOSCIO    // Oscillator Selection->Internal oscillator
-#pragma config PCLKEN = ON    // Primary Oscillator Shutdown->Primary oscillator enabled
-#pragma config FCMEN = OFF    // Fail-Safe Clock Monitor->Fail-Safe Clock Monitor disabled
-#pragma config IESO = OFF    // Internal/External Oscillator Switchover->Oscillator Switchover mode disabled
+// CONFIG2
+#pragma config CLKOUTEN = OFF    // Clock out Enable bit->CLKOUT function is disabled
+#pragma config PR1WAY = ON    // PRLOCKED One-Way Set Enable bit->PRLOCKED bit can be cleared and set only once
+#pragma config CSWEN = ON    // Clock Switch Enable bit->Writing to NOSC and NDIV is allowed
+#pragma config JTAGEN = ON    // JTAG Enable bit->Enable JTAG Boundary Scan mode and pins
+#pragma config FCMEN = ON    // Fail-Safe Clock Monitor Enable bit->Fail-Safe Clock Monitor enabled
+#pragma config FCMENP = ON    // Fail-Safe Clock Monitor -Primary XTAL Enable bit->FSCM timer will set FSCMP bit and OSFIF interrupt on Primary XTAL failure
+#pragma config FCMENS = ON    // Fail-Safe Clock Monitor -Secondary XTAL Enable bit->FSCM timer will set FSCMS bit and OSFIF interrupt on Secondary XTAL failure
 
-// CONFIG2L
-#pragma config nPWRTEN = OFF    // Power-up Timer Enable->Power up timer disabled
-#pragma config BOREN = SBORDIS    // Brown-out Reset Enable->BOR enabled in hardware (SBOREN is ignored)
-#pragma config BORV = 190    // Brown-out Reset Voltage->BOR set to 1.9V nominal
-#pragma config nLPBOR = OFF    // Low-Power Brown-out Reset->Low-Power Brown-out Reset disabled
+// CONFIG3
+#pragma config MCLRE = EXTMCLR    // MCLR Enable bit->If LVP = 0, MCLR pin is MCLR; If LVP = 1, RE3 pin function is MCLR 
+#pragma config PWRTS = PWRT_OFF    // Power-up timer selection bits->PWRT is disabled
+#pragma config MVECEN = ON    // Multi-vector enable bit->Multi-vector enabled, Vector table used for interrupts
+#pragma config IVT1WAY = ON    // IVTLOCK bit One-way set enable bit->IVTLOCKED bit can be cleared and set only once
+#pragma config LPBOREN = OFF    // Low Power BOR Enable bit->Low-Power BOR disabled
+#pragma config BOREN = SBORDIS    // Brown-out Reset Enable bits->Brown-out Reset enabled , SBOREN bit is ignored
 
-// CONFIG2H
-#pragma config WDTEN = OFF    // Watchdog Timer Enable bits->WDT disabled in hardware (SWDTEN ignored)
-#pragma config WDTPS = 32768    // Watchdog Timer Postscaler->1:32768
+// CONFIG4
+#pragma config BORV = VBOR_1P9    // Brown-out Reset Voltage Selection bits->Brown-out Reset Voltage (VBOR) set to 1.9V
+#pragma config ZCD = OFF    // ZCD Disable bit->ZCD module is disabled. ZCD can be enabled by setting the ZCDSEN bit of ZCDCON
+#pragma config PPS1WAY = ON    // PPSLOCK bit One-Way Set Enable bit->PPSLOCKED bit can be cleared and set only once; PPS registers remain locked after one clear/set cycle
+#pragma config STVREN = ON    // Stack Full/Underflow Reset Enable bit->Stack full/underflow will cause Reset
+#pragma config LVP = ON    // Low Voltage Programming Enable bit->Low voltage programming enabled. MCLR/VPP pin function is MCLR. MCLRE configuration bit is ignored
+#pragma config XINST = OFF    // Extended Instruction Set Enable bit->Extended Instruction Set and Indexed Addressing Mode disabled
 
-// CONFIG3H
-#pragma config CCP2MX = RC1    // CCP2 MUX bit->CCP2 input/output is multiplexed with RC1
-#pragma config PBADEN = ON    // PORTB A/D Enable bit->PORTB<5:0> pins are configured as analog input channels on Reset
-#pragma config T3CMX = RC0    // Timer3 Clock Input MUX bit->T3CKI function is on RC0
-#pragma config SDOMX = RB3    // SDO Output MUX bit->SDO function is on RB3
-#pragma config MCLRE = ON    // Master Clear Reset Pin Enable->MCLR pin enabled; RE3 input disabled
+// CONFIG5
+#pragma config WDTCPS = WDTCPS_31    // WDT Period selection bits->Divider ratio 1:65536; software control of WDTPS
+#pragma config WDTE = OFF    // WDT operating mode->WDT Disabled; SWDTEN is ignored
 
-// CONFIG4L
-#pragma config STVREN = ON    // Stack Full/Underflow Reset->Stack full/underflow will cause Reset
-#pragma config LVP = ON    // Single-Supply ICSP Enable bit->Single-Supply ICSP enabled if MCLRE is also 1
-#pragma config ICPRT = OFF    // Dedicated In-Circuit Debug/Programming Port Enable->ICPORT disabled
-#pragma config XINST = OFF    // Extended Instruction Set Enable bit->Instruction set extension and Indexed Addressing mode disabled
-#pragma config DEBUG = OFF    // Background Debugger Enable bit->Background debugger disabled, RB6 and RB7 configured as general purpose I/O pins
+// CONFIG6
+#pragma config WDTCWS = WDTCWS_7    // WDT Window Select bits->window always open (100%); software control; keyed access not required
+#pragma config WDTCCS = SC    // WDT input clock selector->Software Control
 
-// CONFIG5L
-#pragma config CP0 = OFF    // Block 0 Code Protect->Block 0 is not code-protected
-#pragma config CP1 = OFF    // Block 1 Code Protect->Block 1 is not code-protected
-#pragma config CP2 = OFF    // Block 2 Code Protect->Block 2 is not code-protected
-#pragma config CP3 = OFF    // Block 3 Code Protect->Block 3 is not code-protected
+// CONFIG7
+#pragma config BBSIZE = BBSIZE_512    // Boot Block Size selection bits->Boot Block size is 512 words
+#pragma config BBEN = OFF    // Boot Block enable bit->Boot block disabled
+#pragma config SAFEN = OFF    // Storage Area Flash enable bit->SAF disabled
 
-// CONFIG5H
-#pragma config CPB = OFF    // Boot Block Code Protect->Boot block is not code-protected
-#pragma config CPD = OFF    // Data EEPROM Code Protect->Data EEPROM is not code-protected
+// CONFIG8
+#pragma config WRTB = OFF    // Boot Block Write Protection bit->Boot Block not Write protected
+#pragma config WRTC = OFF    // Configuration Register Write Protection bit->Configuration registers not Write protected
+#pragma config WRTD = OFF    // Data EEPROM Write Protection bit->Data EEPROM not Write protected
+#pragma config WRTSAF = OFF    // SAF Write protection bit->SAF not Write Protected
+#pragma config WRTAPP = OFF    // Application Block write protection bit->Application Block not write protected
 
-// CONFIG6L
-#pragma config WRT0 = OFF    // Block 0 Write Protect->Block 0 (0800-1FFFh) is not write-protected
-#pragma config WRT1 = OFF    // Block 1 Write Protect->Block 1 (2000-3FFFh) is not write-protected
-#pragma config WRT2 = OFF    // Block 2 Write Protect->Block 2 (04000-5FFFh) is not write-protected
-#pragma config WRT3 = OFF    // Block 3 Write Protect->Block 3 (06000-7FFFh) is not write-protected
+// CONFIG9
+#pragma config BOOTPINSEL = RC5    // CRC on boot output pin selection->CRC on boot output pin is RC5
+#pragma config BPEN = OFF    // CRC on boot output pin enable bit->CRC on boot output pin disabled
+#pragma config ODCON = OFF    // CRC on boot output pin open drain bit->Pin drives both high-going and low-going signals
 
-// CONFIG6H
-#pragma config WRTC = OFF    // Configuration Registers Write Protect->Configuration registers (300000-3000FFh) are not write-protected
-#pragma config WRTB = OFF    // Boot Block Write Protect->Boot block (0000-7FFh) is not write-protected
-#pragma config WRTD = OFF    // Data EEPROM Write Protect->Data EEPROM is not write-protected
+// CONFIG10
+#pragma config CP = OFF    // PFM and Data EEPROM Code Protection bit->PFM and Data EEPROM code protection disabled
 
-// CONFIG7L
-#pragma config EBTR0 = OFF    // Block 0 Table Read Protect->Block 0 is not protected from table reads executed in other blocks
-#pragma config EBTR1 = OFF    // Block 1 Table Read Protect->Block 1 is not protected from table reads executed in other blocks
-#pragma config EBTR2 = OFF    // Block 2 Table Read Protect->Block 2 is not protected from table reads executed in other blocks
-#pragma config EBTR3 = OFF    // Block 3 Table Read Protect->Block 3 is not protected from table reads executed in other blocks
+// CONFIG11
+#pragma config BOOTSCEN = OFF    // CRC on boot scan enable for boot area->CRC on boot will not include the boot area of program memory in its calculation
+#pragma config BOOTCOE = HALT    // CRC on boot Continue on Error for boot areas bit->CRC on boot will stop device if error is detected in boot areas
+#pragma config APPSCEN = OFF    // CRC on boot application code scan enable->CRC on boot will not include the application area of program memory in its calculation
+#pragma config SAFSCEN = OFF    // CRC on boot SAF area scan enable->CRC on boot will not include the SAF area of program memory in its calculation
+#pragma config DATASCEN = OFF    // CRC on boot Data EEPROM scan enable->CRC on boot will not include data EEPROM in its calculation
+#pragma config CFGSCEN = OFF    // CRC on boot Config fuses scan enable->CRC on boot will not include the configuration fuses in its calculation
+#pragma config COE = HALT    // CRC on boot Continue on Error for non-boot areas bit->CRC on boot will stop device if error is detected in non-boot areas
+#pragma config BOOTPOR = OFF    // Boot on CRC Enable bit->CRC on boot will not run
 
-// CONFIG7H
-#pragma config EBTRB = OFF    // Boot Block Table Read Protect->Boot block is not protected from table reads executed in other blocks
+// CONFIG12
+#pragma config BCRCPOLT = hFF    // Boot Sector Polynomial for CRC on boot bits 31-24->Bits 31:24 of BCRCPOL are 0xFF
+
+// CONFIG13
+#pragma config BCRCPOLU = hFF    // Boot Sector Polynomial for CRC on boot bits 23-16->Bits 23:16 of BCRCPOL are 0xFF
+
+// CONFIG14
+#pragma config BCRCPOLH = hFF    // Boot Sector Polynomial for CRC on boot bits 15-8->Bits 15:8 of BCRCPOL are 0xFF
+
+// CONFIG15
+#pragma config BCRCPOLL = hFF    // Boot Sector Polynomial for CRC on boot bits 7-0->Bits 7:0 of BCRCPOL are 0xFF
+
+// CONFIG16
+#pragma config BCRCSEEDT = hFF    // Boot Sector Seed for CRC on boot bits 31-24->Bits 31:24 of BCRCSEED are 0xFF
+
+// CONFIG17
+#pragma config BCRCSEEDU = hFF    // Boot Sector Seed for CRC on boot bits 23-16->Bits 23:16 of BCRCSEED are 0xFF
+
+// CONFIG18
+#pragma config BCRCSEEDH = hFF    // Boot Sector Seed for CRC on boot bits 15-8->Bits 15:8 of BCRCSEED are 0xFF
+
+// CONFIG19
+#pragma config BCRCSEEDL = hFF    // Boot Sector Seed for CRC on boot bits 7-0->Bits 7:0 of BCRCSEED are 0xFF
+
+// CONFIG24
+#pragma config CRCPOLT = hFF    // Non-Boot Sector Polynomial for CRC on boot bits 31-24->Bits 31:24 of CRCPOL are 0xFF
+
+// CONFIG25
+#pragma config CRCPOLU = hFF    // Non-Boot Sector Polynomial for CRC on boot bits 23-16->Bits 23:16 of CRCPOL are 0xFF
+
+// CONFIG26
+#pragma config CRCPOLH = hFF    // Non-Boot Sector Polynomial for CRC on boot bits 15-8->Bits 15:8 of CRCPOL are 0xFF
+
+// CONFIG27
+#pragma config CRCPOLL = hFF    // Non-Boot Sector Polynomial for CRC on boot bits 7-0->Bits 7:0 of CRCPOL are 0xFF
+
+// CONFIG28
+#pragma config CRCSEEDT = hFF    // Non-Boot Sector Seed for CRC on boot bits 31-24->Bits 31:24 of CRCSEED are 0xFF
+
+// CONFIG29
+#pragma config CRCSEEDU = hFF    // Non-Boot Sector Seed for CRC on boot bits 23-16->Bits 23:16 of CRCSEED are 0xFF
+
+// CONFIG30
+#pragma config CRCSEEDH = hFF    // Non-Boot Sector Seed for CRC on boot bits 15-8->Bits 15:8 of CRCSEED are 0xFF
+
+// CONFIG31
+#pragma config CRCSEEDL = hFF    // Non-Boot Sector Seed for CRC on boot bits 7-0->Bits 7:0 of CRCSEED are 0xFF

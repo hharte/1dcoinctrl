@@ -13,8 +13,8 @@
   Description:
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
-        Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.78.1
-        Device            :  PIC18F45K50
+        Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
+        Device            :  PIC18F47Q84
         Driver Version    :  2.00
 */
 
@@ -43,107 +43,39 @@
 
 #include "mcc_generated_files/mcc.h"
 
-#define RS232_CONSOLE
-
 extern uint8_t coinctrl_main(void);
-
-char getch_usb(void);
-void putch_usb(char txData);
 
 /*
                          Main application
  */
 void main(void)
 {
-    char c;
-    uint8_t rcon_copy = RCON;
     // Initialize the device
     SYSTEM_Initialize();
 
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
-    // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
+    // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global Interrupts
     // Use the following macros to:
 
-    // Enable the Global Interrupts
-    INTERRUPT_GlobalInterruptEnable();
+    // Enable high priority global interrupts
+    //INTERRUPT_GlobalInterruptHighEnable();
 
-    // Disable the Global Interrupts
-    //INTERRUPT_GlobalInterruptDisable();
+    // Enable low priority global interrupts.
+    //INTERRUPT_GlobalInterruptLowEnable();
 
-    // Enable the Peripheral Interrupts
-    INTERRUPT_PeripheralInterruptEnable();
+    // Disable high priority global interrupts
+    //INTERRUPT_GlobalInterruptHighDisable();
 
-    // Disable the Peripheral Interrupts
-    //INTERRUPT_PeripheralInterruptDisable();
-    
+    // Disable low priority global interrupts.
+    //INTERRUPT_GlobalInterruptLowDisable();
+
+    coinctrl_main();
+    printf("DIED!!!!!!!!!!!!!\n\r\n");
     while (1)
     {
-        coinctrl_main();
+        // Add your application code
     }
 }
-
-char getch(void)
-{
-#ifdef RS232_CONSOLE
-    return(EUSART1_Read());
-#else
-    return(getch_usb());
-#endif /* RS232_CONSOLE */
-}
-
-void putch(char txData)
-{
-#ifdef RS232_CONSOLE
-    EUSART1_Write(txData);
-#else
-    putch_usb(txData);
-#endif /* RS232_CONSOLE */
-
-}
-
-char getch_usb(void)
-{
-    int got_char;
-    uint8_t buffer[1];
-
-    if( USBGetDeviceState() < CONFIGURED_STATE )
-    {
-        return 0;
-    }
-
-    if( USBIsDeviceSuspended()== true )
-    {
-        return 0;
-    }
-
-    while ((got_char = getsUSBUSART(buffer, 1)) == 0);
-    
-    return(buffer[0]);
-}
-
-void putch_usb(char txData)
-{
-    if( USBGetDeviceState() < CONFIGURED_STATE )
-    {
-        return;
-    }
-
-    if( USBIsDeviceSuspended()== true )
-    {
-        return;
-    }
-
-    while( USBUSARTIsTxTrfReady() == false) {
-        CDCTxService();
-    }
-    
-    putUSBUSART((uint8_t *)&txData, 1);
-
-    CDCTxService();
-}
-
-
 /**
  End of File
 */
-

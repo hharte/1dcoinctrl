@@ -13,12 +13,12 @@
   @Description
     This header file provides APIs for TMR0.
     Generation Information :
-        Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.78.1
-        Device            :  PIC18F45K50
-        Driver Version    :  2.01
+        Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
+        Device            :  PIC18F47Q84
+        Driver Version    :  3.10
     The generated drivers are tested against the following:
-        Compiler          :  XC8 2.10 and above
-        MPLAB 	          :  MPLAB X 5.30
+        Compiler          :  XC8 2.36 and above
+        MPLAB 	          :  MPLAB X 6.00
 */
 
 /*
@@ -90,8 +90,8 @@
     None
 
   @Comment
-    
-	
+   
+   
   @Example
     <code>
     main()
@@ -166,13 +166,12 @@ void TMR0_StartTimer(void);
 */
 void TMR0_StopTimer(void);
 
-
 /**
   @Summary
-    Reads the 16 bits TMR0 register value.
+    Reads the 8 bits TMR0 register value.
 
   @Description
-    This function reads the 16 bits TMR0 register value and return it.
+    This function reads the 8 bits TMR0 register value and return it.
 
   @Preconditions
     Initialize  the TMR0 before calling this function.
@@ -181,7 +180,7 @@ void TMR0_StopTimer(void);
     None
 
   @Returns
-    This function returns the 16 bits value of TMR0 register.
+    This function returns the 8 bits value of TMR0 register.
 
   @Example
     <code>
@@ -195,19 +194,19 @@ void TMR0_StopTimer(void);
     {
         // Do something else...
 
-        // Reload the TMR value
-        TMR0_Reload();
+        // Stop TMR0;
+        TMR0_StopTimer();
     }
     </code>
 */
-uint16_t TMR0_ReadTimer(void);
+uint8_t TMR0_ReadTimer(void);
 
 /**
   @Summary
-    Writes the 16 bits value to TMR0 register.
+    Writes the 8 bits value to TMR0 register.
 
   @Description
-    This function writes the 16 bits value to TMR0 register.
+    This function writes the 8 bits value to TMR0 register.
     This function must be called after the initialization of TMR0.
 
   @Preconditions
@@ -221,12 +220,12 @@ uint16_t TMR0_ReadTimer(void);
 
   @Example
     <code>
-    #define PERIOD 0x8000
-    #define ZERO   0x0000
+    #define PERIOD 0x80
+    #define ZERO   0x00
 
     while(1)
     {
-        //Read the TMR0 register
+        // Read the TMR0 register
         if(ZERO == TMR0_ReadTimer())
         {
             // Do something else...
@@ -239,24 +238,25 @@ uint16_t TMR0_ReadTimer(void);
     }
     </code>
 */
-void TMR0_WriteTimer(uint16_t timerVal);
+void TMR0_WriteTimer(uint8_t timerVal);
 
 /**
   @Summary
-    Reload the 16 bits value to TMR0 register.
+    Load value to Period Register.
 
   @Description
-    This function reloads the 16 bit value to TMR0 register.
-    This function must be called to write initial value into TMR0 register.
+    This function writes the value to TMR0H register.
+    This function must be called after the initialization of TMR0.
 
   @Preconditions
     Initialize  the TMR0 before calling this function.
 
   @Param
-    None
+    periodVal - Value to load into TMR0 register.
 
   @Returns
     None
+
 
   @Example
     <code>
@@ -269,31 +269,15 @@ void TMR0_WriteTimer(uint16_t timerVal);
             // clear the TMR0 interrupt flag
             TMR0IF = 0;
 
-            // Reload the initial value of TMR0
-            TMR0_Reload();
+            // Change the period value of TMR0
+            TMR0_Reload(0x80);
         }
     }
     </code>
 */
-void TMR0_Reload(void);
+void TMR0_Reload(uint8_t periodVal);
 
-/**
-  @Summary
-    Timer Interrupt Service Routine
 
-  @Description
-    Timer Interrupt Service Routine is called by the Interrupt Manager.
-
-  @Preconditions
-    Initialize  the TMR0 module with interrupt before calling this isr.
-
-  @Param
-    None
-
-  @Returns
-    None
- */
-void TMR0_ISR(void);
 
 /**
   @Summary

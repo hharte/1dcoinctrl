@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2020 Howard M. Harte, WZ2Q.                             *
+ * Copyright (c) 2020-2022 Howard M. Harte, WZ2Q.                        *
  * http://www.magicandroidapps.com                                       *
  *                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining *
@@ -30,7 +30,8 @@
  * Module Description:                                                   *
  *                                                                       *
  * Environment:                                                          *
- *     MPLAB X IDE v5.30                                                 *
+ *     MPLAB X IDE v6.00                                                 *
+ *     PIC18F47Q84                                                       *
  *                                                                       *
  *************************************************************************/
  
@@ -40,9 +41,9 @@
 #include  <ctype.h>
 
 #include "mcc_generated_files/mcc.h"
-#include "mcc_generated_files/examples/i2c1_master_example.h"
 
 //#define DEBUG
+//#define DEBUG_PULSES
 
 #define COIN_LINE_MAX       4
 
@@ -89,38 +90,32 @@
 
 #define TEST_STATUS         TEST_STATUS_GetValue()
 
-#define MCP23008_BASE       (0x20)
-#define MCP23008_IODIR      (0x00)
-#define MCP23008_IPOL       (0x01)
-#define MCP23008_GPINTEN    (0x02)
-#define MCP23008_DEFVAL     (0x03)
-#define MCP23008_INTCON     (0x04)
-#define MCP23008_IOCON      (0x05)
-#define MCP23008_GPPU       (0x06)
-#define MCP23008_INTF       (0x07)
-#define MCP23008_INTCAP     (0x08)
-#define MCP23008_GPIO       (0x09)
-#define MCP23008_OLAT       (0x0A)
-
 #ifdef DEBUG
 #define DBG_PRINT(x) printf x
 #else
 #define DBG_PRINT(x)
 #endif
 
-const char          menu[] = "ATC Collect coin\n\r" \
-                             "ATR Refund coin\n\r" \
-                             "ATI Initial rate test\n\r" \
-                             "ATS Stuck coin test\n\r" \
-                             "ATQ Query hook state\n\r" \
-                             "ATH Hold CO line\n\r" \
-                             "ATU Un-hold CO line\n\r" \
-                             "ATV Display version information\n\r" \
-                             "AT? Help\n\r"
-                             "\n> ";
+const char menu[] =
+    "ATC Collect coin\n\r" \
+    "ATR Refund coin\n\r" \
+    "ATI Initial rate test\n\r" \
+    "ATS Stuck coin test\n\r" \
+    "ATQ Query hook state\n\r" \
+    "ATL Query selected line\n\r" \
+    "ATH Hold CO line\n\r" \
+    "ATU Un-hold CO line\n\r" \
+    "ATZ Reset controller\n\r" \
+    "ATD Dump current state\n\r" \
+    "ATE Test 100 refunds.\n\r" \
+    "ATT Test (needs hard reset to exit.)\n\r" \
+    "ATV Display version information\n\r" \
+    "AT? Help\n\n\r" \
+    "Line number (1-4) may be specified after the AT command,\n\r" \
+    "for example: ATC2 will collect line 2.\n\r";
 
 volatile uint32_t timer_tick = 0;
-volatile uint32_t int2_count = 0;
+volatile uint32_t ioc_count = 0;
 
 typedef struct pulse_entry {
     uint16_t pulse_duration;
@@ -135,14 +130,23 @@ typedef struct digit_fifo {
     uint8_t rptr;
     uint8_t dialed_digit[DIGIT_LIST_ENTRIES_MAX];
     uint8_t current_digit;
+    uint16_t digit_start_time;
+    uint16_t digit_duration;
 } digit_fifo_t;
 
 typedef struct hook_switch_context {
     uint32_t last_tick;
     uint8_t wptr;
     uint8_t rptr;
+#ifdef DEBUG_PULSES
     pulse_entry_t pulse_list[PULSE_LIST_ENTRIES_MAX];
+#endif /* DEBUG_FIFO */
     digit_fifo_t digits;
+    volatile uint8_t dial_in_progress;
+    uint8_t coin_op_in_progress;
+    volatile uint8_t hook_state;
+    uint8_t hook_state_delayed;
+    uint8_t prev_hook_state;
 } hook_switch_context_t;
 
 hook_switch_context_t hs_context[COIN_LINE_MAX] = { 0 };
@@ -152,14 +156,15 @@ void TIMER0_ISR(void);
 void hook_state_ISR(void);
 void process_coin_lines(void);
 static void set_line_hold(uint8_t coin_line, uint8_t state);
-static uint8_t read_hook_state(uint8_t coin_line);
+static void set_line_hold_cmd(uint8_t coin_line, uint8_t state);
 static void do_coin_ctrl(uint8_t coin_line, uint8_t state);
 static void collect_coin(uint8_t coin_line, uint8_t collect);
 static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate);
 static void print_version(void);
 static void coinctrl_reset(void);
-static uint8_t MCP23008_Read(uint8_t reg);
-static uint8_t MCP23008_Write(uint8_t reg, uint8_t val);
+void clear_ioc_per_line(uint8_t coin_line);
+
+void process_coin_lines(void);
 
 uint8_t coinctrl_main(void)
 {
@@ -169,28 +174,52 @@ uint8_t coinctrl_main(void)
     char atcmd[80];
     char len = 0;
     char i;
+    uint8_t pps;
+    uint8_t digit;
+    uint16_t digit_duration;
+
+    print_version();
+    printf("\n");
 
     /* Initialize the 1ms tick timer. */
-    TMR0_Initialize();
     TMR0_SetInterruptHandler(TIMER0_ISR);
     TMR0_StartTimer();
 
-    INT2_SetInterruptHandler(hook_state_ISR);
+    /* Configure IOC interrupts for hook state sensors */
+    IOCBF0_SetInterruptHandler(hook_state_ISR);
+    IOCBF1_SetInterruptHandler(hook_state_ISR);
+    IOCBF2_SetInterruptHandler(hook_state_ISR);
+    IOCCF1_SetInterruptHandler(hook_state_ISR);
+    IOCCF2_SetInterruptHandler(hook_state_ISR);
+    IOCCF3_SetInterruptHandler(hook_state_ISR);
+    IOCCF4_SetInterruptHandler(hook_state_ISR);
+    IOCCF5_SetInterruptHandler(hook_state_ISR);
+
+    // Enable high priority global interrupts
+    INTERRUPT_GlobalInterruptHighEnable();
+
+    // Clear any pending IOC interrupts.
+    IOCBF = 0;
+    IOCCF = 0;
+    // Enable low priority global interrupts
+    INTERRUPT_GlobalInterruptLowEnable();
 
     coinctrl_reset();
     coin_line = 0;                      // Set default coin_line
 
     while (1) {
 
+//        process_coin_lines();
+
         while (c != '\r') {
-            c = getch();
+            c = UART1_Read();
 
             if ((c == 0x08) || (c == 0x7F)) {
                 len--;
                 atcmd[len] = 0;
                 putchar(0x7F);
             } else {
-                atcmd[len] = toupper(c);
+                atcmd[len] = (char)toupper(c);
                 len++;
                 putchar(c);
             }
@@ -209,17 +238,37 @@ uint8_t coinctrl_main(void)
                 continue;
             }
 
+        DBG_PRINT(("Timer_tick: %lu (last: %lu), ioc_int: %lu, Current Line: %d, hook state: %d -> %d (%d delayed), dial in progress: %d, last dialed_digit: %d\n\r",
+                timer_tick,
+                hs_context[coin_line].last_tick,
+                ioc_count,
+                coin_line + 1,
+                hs_context[coin_line].prev_hook_state,
+                hs_context[coin_line].hook_state,
+                hs_context[coin_line].hook_state_delayed,
+                hs_context[coin_line].dial_in_progress,
+                hs_context[coin_line].digits.dialed_digit[(hs_context[coin_line].digits.wptr - 1) & (DIGIT_LIST_ENTRIES_MAX - 1)]));
+
             switch (atcmd[2]) {
             case 'D': /* Dump current state. */
-                printf("Timer_tick: %lu, Current Line: %d, hook state: %d, dialed_digit: 0x%02x, INT2 count: %lu\n\r",
+                digit = hs_context[coin_line].digits.dialed_digit[(hs_context[coin_line].digits.wptr - 1) & (DIGIT_LIST_ENTRIES_MAX - 1)];
+                if (digit > 1) {
+                    /* Calculate PPS */
+                    digit_duration = hs_context[coin_line].digits.digit_duration;
+                    pps = (uint8_t)(((digit - 1) * 1000) / (digit_duration / 10));
+                }
+                printf("Timer_tick: %lu, Current Line: %d, hook state: %d -> %d, dial in progress: %d, last dialed_digit: %d, %u.%upps\n\r",
                         timer_tick,
                         coin_line + 1,
-                        read_hook_state(coin_line),
-                        hs_context[coin_line - 1].digits.dialed_digit[hs_context[coin_line - 1].digits.rptr],
-                        int2_count);
+                        hs_context[coin_line].prev_hook_state,
+                        hs_context[coin_line].hook_state,
+                        hs_context[coin_line].dial_in_progress,
+                        digit,
+                        pps / 10, pps % 10);
 
                 for (i = 0; i < COIN_LINE_MAX; i++) {
                     pHS = &hs_context[i];
+#ifdef DEBUG_PULSES
                     while(pHS->rptr != pHS->wptr) {
                         printf("%d: [%u ms] 0x%02x\n\r", hs_context[i].rptr,
                                 pHS->pulse_list[pHS->rptr].pulse_duration,
@@ -231,6 +280,7 @@ uint8_t coinctrl_main(void)
                     if (pHS->digits.rptr == pHS->digits.wptr) {
                         continue;
                     }
+#endif /* DEBUG_PULSES */
                     printf("\n\rLine %d dialed digits: ", i + 1);
 
                     while (pHS->digits.rptr != pHS->digits.wptr) {
@@ -243,11 +293,11 @@ uint8_t coinctrl_main(void)
                 puts("\rOK\r");
                 break;
             case 'H':
-                set_line_hold(coin_line, HOLD);
+                set_line_hold_cmd(coin_line, HOLD);
                 puts("OK\r");
                 break;
             case 'U':
-                set_line_hold(coin_line, RELEASE);
+                set_line_hold_cmd(coin_line, RELEASE);
                 puts("OK\r");
                 break;
             case 'C':
@@ -263,12 +313,22 @@ uint8_t coinctrl_main(void)
                 break;
             case 'V':
                 print_version();
+                puts("OK\r");
                 break;
             case 'S':
                 printf("%d\n\r", test_coin(coin_line, STUCK_COIN));
                 break;
+            case 'T':
+                printf("Starting test, RESET to exit....\n\r");
+                while (1) {
+                    process_coin_lines();
+                }
+                break;
             case 'Q':
-                printf("%d\n\r", read_hook_state(coin_line));
+                printf("%d\n\r", hs_context[coin_line].hook_state);
+                break;
+            case 'L':
+                printf("%d\n\r", coin_line + 1);
                 break;
             case 'E':
                 for (i = 0; i < 100 ; i++) {
@@ -276,6 +336,7 @@ uint8_t coinctrl_main(void)
                     collect_coin(coin_line, REFUND);
                     delay_ms(1000);
                 }
+                puts("OK\r");
                 break;
             case 'Z': /* Reset */
                 coinctrl_reset();
@@ -286,6 +347,7 @@ uint8_t coinctrl_main(void)
                 break;
             case '?':
                 printf(menu);
+                puts("OK\r");
                 break;
             default:
                 puts("ERROR\r");
@@ -297,13 +359,55 @@ uint8_t coinctrl_main(void)
     return 0;
 }
 
+void process_coin_lines(void)
+{
+    uint8_t coin_line;
+    hook_switch_context_t *pHS;
+    uint8_t prev_hook_state, hook_state;
+
+    for (coin_line = 0; coin_line < COIN_LINE_MAX; coin_line++) {
+        pHS = &hs_context[coin_line];
+
+        /* Do not process the hook switch state while dialing is in progress. */
+        if (pHS->dial_in_progress == 1) continue;
+
+        hook_state = pHS->hook_state_delayed;
+        prev_hook_state = pHS->prev_hook_state;
+        if (hook_state != prev_hook_state) {
+            printf("Hook state for line %d changed from %d to %d.\n\r",
+                    coin_line + 1,
+                    prev_hook_state,
+                    hook_state);
+
+            switch(hook_state) {
+                case ON_HOOK:
+                    if (prev_hook_state == OFF_HOOK_F) {
+                        printf("Refund coin, line %d.\n\r", coin_line);
+                        collect_coin(coin_line, REFUND);
+                    } else if (prev_hook_state == OFF_HOOK_R) {
+                        printf("Collect coin, line %d\n\r", coin_line);
+                        collect_coin(coin_line, COLLECT);
+                    }
+                    break;
+                case OFF_HOOK_R:
+                    if (prev_hook_state == OFF_HOOK_F) {
+                        printf("Collect coin2, line %d\n\r", coin_line);
+                        collect_coin(coin_line, COLLECT);
+                    }
+            }
+            pHS->prev_hook_state = pHS->hook_state_delayed;
+        }
+    }
+}
+
 static void print_version(void)
 {
-    printf("\n\rWestern Electric 1D Coin Controller Iss 2 Firmware v1.0\n\r" \
-           "(c) 2020 Howard M. Harte, WZ2Q\n\r" \
+    printf("\n\rWestern Electric 1D Coin Controller Iss 2 Firsmware v1.1\n\r" \
+           "(c) 2020-2022 Howard M. Harte, WZ2Q\n\r" \
            "http://github.com/hharte/1dcoinctrl\n\r");
 }
 
+/* Use the 1ms timer tick to delay for the specified number of milliseconds. */
 static void delay_ms(uint16_t ms)
 {
     uint32_t end_time;
@@ -311,9 +415,11 @@ static void delay_ms(uint16_t ms)
     end_time = timer_tick + ms;
     
     while (timer_tick < end_time);
+
 }
 
-/* The TIMER0_ISR must be higher-priority than the INT2 ISR. */
+
+/* The TIMER0_ISR must be higher-priority than the IOC ISR. */
 void TIMER0_ISR(void)
 {
     hook_switch_context_t *pHS;
@@ -337,7 +443,9 @@ void TIMER0_ISR(void)
                 pHS->digits.wptr++;
                 pHS->digits.wptr &= (DIGIT_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
                 pHS->digits.current_digit = 0;
+                pHS->dial_in_progress = 0;
             }
+            pHS->hook_state_delayed = pHS->hook_state;
         }
     }
 }
@@ -356,9 +464,10 @@ void hook_state_ISR(void)
     static uint32_t off_hook_start_time[COIN_LINE_MAX] = { 0 };
     uint16_t off_hook_pulse_duration;
 
-    int2_count++;
+    ioc_count++;
 
-    hook_state = MCP23008_Read(MCP23008_GPIO);
+    hook_state  = (~(PORTC << 2)) & 0xF8;
+    hook_state |= ~(PORTB & 0x07);
 
     for (coin_line = 0; coin_line < COIN_LINE_MAX; coin_line++) {
         pHS = &hs_context[coin_line];
@@ -366,6 +475,9 @@ void hook_state_ISR(void)
         coin_line_hook_state = (hook_state >> (coin_line << 1)) & 0x03;
         prev_coin_line_hook_state = (prev_hook_state >> (coin_line << 1)) & 0x03;
 
+        if (pHS->coin_op_in_progress == 1) {
+            continue;
+        }
         if (prev_coin_line_hook_state == coin_line_hook_state) {
             continue;
         }
@@ -376,17 +488,24 @@ void hook_state_ISR(void)
         if (coin_line_hook_state == ON_HOOK) {
             on_hook_start_time[coin_line] = timer_tick;
             on_hook_pulse_duration = 0;
-            off_hook_pulse_duration = timer_tick - off_hook_start_time[coin_line];
+            off_hook_pulse_duration = (uint16_t)(timer_tick - off_hook_start_time[coin_line]);
+#ifdef DEBUG_PULSES
             pHS->pulse_list[pHS->wptr].pulse_duration = off_hook_pulse_duration;
+#endif /* DEBUG_PULSES */
         } else { /* OFF_HOOK */
             off_hook_start_time[coin_line] = timer_tick;
             off_hook_pulse_duration = 0;
-            on_hook_pulse_duration = timer_tick - on_hook_start_time[coin_line];
+            on_hook_pulse_duration = (uint16_t)(timer_tick - on_hook_start_time[coin_line]);
+#ifdef DEBUG_PULSES
             pHS->pulse_list[pHS->wptr].pulse_duration = on_hook_pulse_duration;
+#endif /* DEBUG_PULSES */
         }
 
+#ifdef DEBUG_PULSES
         /* Store the pulse details in a circular buffer for debugging. */
-        pHS->pulse_list[pHS->wptr].hook_state = hook_state;
+        pHS->pulse_list[pHS->wptr].hook_state = coin_line_hook_state;
+#endif /* DEBUG_PULSES */
+        pHS->hook_state = coin_line_hook_state;
         pHS->wptr++;
         pHS->wptr &= (PULSE_LIST_ENTRIES_MAX - 1); /* Wrap the pointer */
 
@@ -397,7 +516,12 @@ void hook_state_ISR(void)
             /* Ignore glitches */
             continue;
         } else if (on_hook_pulse_duration <= 80) {
+            pHS->dial_in_progress = 1;
             /* If the pulse is less than 80ms, it must be a dial pulse. */
+            if (pHS->digits.current_digit == 0) {
+                pHS->digits.digit_start_time = (uint16_t)timer_tick;
+            }
+            pHS->digits.digit_duration = (uint16_t)(timer_tick - pHS->digits.digit_start_time);
             pHS->digits.current_digit++;
         }
     }
@@ -405,14 +529,17 @@ void hook_state_ISR(void)
     prev_hook_state = hook_state;
 }
 
+/* Put the line on hold, no guard against spurious hook state interrupts. */
 static void set_line_hold(uint8_t coin_line, uint8_t state)
 {
     if (coin_line >= COIN_LINE_MAX) {
-        DBG_PRINT(("Invalid coin_line %d selected.\n\r", coin_line));
+        DBG_PRINT(("Invalid coin_line %d selected.\n\r", coin_line + 1));
         return;
     }
 
-    DBG_PRINT(("%s coin_line %d\n\r", state ? "Holding" : "Releasing", coin_line));
+    DBG_PRINT(("%s coin_line %d\n\r",
+                state ? "Holding" : "Releasing", coin_line + 1));
+
     switch (coin_line) {
     case 0:
         if (state == TRUE) L1_HOLD_ON; else L1_HOLD_OFF;
@@ -427,32 +554,29 @@ static void set_line_hold(uint8_t coin_line, uint8_t state)
         if (state == TRUE) L4_HOLD_ON; else L4_HOLD_OFF;
         break;
     }
-
 }
 
-#define HOOK_BITS_SHIFT     ((coin_line - 1) << 1)
-#define HOOK_BITS_MASK      (0x03)
-static uint8_t read_hook_state(uint8_t coin_line)
+/* Command wrapper to put the line on hold, guards against spurious hook state interrupts. */
+static void set_line_hold_cmd(uint8_t coin_line, uint8_t state)
 {
-    uint8_t gpio;
+    INTERRUPT_GlobalInterruptLowDisable();
 
-    if (coin_line > COIN_LINE_MAX) {
-        return 0;
-    }
-    gpio = hs_context[0].pulse_list[(hs_context[0].wptr - 1) & (PULSE_LIST_ENTRIES_MAX - 1)].hook_state;
+    set_line_hold(coin_line, state);
 
-    return ((gpio >> HOOK_BITS_SHIFT) & HOOK_BITS_MASK);
+    delay_ms(100);   /* Wait for relays to settle. */
+    clear_ioc_per_line(coin_line);  /* Prevent spurious interrupts. */
+    INTERRUPT_GlobalInterruptLowEnable();
 }
 
 static void do_coin_ctrl(uint8_t coin_line, uint8_t state)
 {
-    
     if (coin_line >= COIN_LINE_MAX) {
-        DBG_PRINT(("Invalid coin_line %d selected.\n\r", coin_line));
+        DBG_PRINT(("Invalid coin_line %d selected.\n\r", coin_line + 1));
         return;
     }
 
-    DBG_PRINT(("%s coin_line %d Coin Control\n\r", state ? "Enable" : "Disable", coin_line));
+    DBG_PRINT(("%s coin_line %d Coin Control\n\r",
+               state ? "Enable" : "Disable", coin_line + 1));
 
     switch (coin_line) {
     case 0:
@@ -473,15 +597,17 @@ static void do_coin_ctrl(uint8_t coin_line, uint8_t state)
 /* Collect or refund the coin in the hopper. */
 static void collect_coin(uint8_t coin_line, uint8_t collect)
 {
-    /* Put CO on hold. */
+    INTERRUPT_GlobalInterruptLowDisable();
+
+     /* Put CO on hold. */
     set_line_hold(coin_line, TRUE);
     
     /* Set REFUND relay off */
     if (collect) {
-        DBG_PRINT(("Collecting coin for coin_line %d\n\r", coin_line));
+        DBG_PRINT(("Collecting coin for coin_line %d\n\r", coin_line + 1));
         REFUND_OFF;
     } else {
-        DBG_PRINT(("Refunding coin for coin_line %d\n\r", coin_line));
+        DBG_PRINT(("Refunding coin for coin_line %d\n\r", coin_line + 1));
         REFUND_ON;
     }
 
@@ -497,22 +623,28 @@ static void collect_coin(uint8_t coin_line, uint8_t collect)
     REFUND_OFF;
     DISPOSITION_OFF;
     delay_ms(100);   /* Wait for relays to settle. */
-
     /* Take coin_line off hold. */
     set_line_hold(coin_line, FALSE);
+
+    delay_ms(100);   /* Wait for relays to settle. */
+    clear_ioc_per_line(coin_line);  /* Prevent spurious interrupts. */
+    INTERRUPT_GlobalInterruptLowEnable();
 }
 
 /* Test for stuck coin or initial rate */
 static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate)
 {
     uint8_t result;
+    hs_context[coin_line].coin_op_in_progress = 1;
+
+    INTERRUPT_GlobalInterruptLowDisable();
 
     /* Set DISPOSITION relay off (selects test mode) */
     DISPOSITION_OFF;
     
     /* Put CO on hold. */
     set_line_hold(coin_line, TRUE);
-    
+
     /* Set REFUND relay */
     if (initial_rate) {
         REFUND_ON;
@@ -525,58 +657,70 @@ static uint8_t test_coin(uint8_t coin_line, uint8_t initial_rate)
     delay_ms(50);   /* Wait for test status to settle. */
 
     result = (TEST_STATUS == 0);
-    
+
     do_coin_ctrl(coin_line, FALSE);
-    
+
     /* Turn REFUND relay off */
     REFUND_OFF;
-
-    delay_ms(100);   /* Wait for relays to settle. */
+    delay_ms(200);   /* Wait for relays to settle. */
 
     /* Remove CO hold. */
     set_line_hold(coin_line, FALSE);
-    
+    delay_ms(100);   /* Wait for relays to settle. */
+    clear_ioc_per_line(coin_line);  /* Prevent spurious interrupts. */
+    INTERRUPT_GlobalInterruptLowEnable();
+
+    hs_context[coin_line].coin_op_in_progress = 0;
     return (result);
+}
+
+/* The hook state sensors will detect transitions when the line is held/unheld
+ * and while coin operations are carried out.  Clear line-specific IOC pending
+ * interrupt state before re-enabling interrupts for the IOC.
+ */
+void clear_ioc_per_line(uint8_t coin_line)
+{
+    switch(coin_line) {
+        case 0:
+            IOCBF0 = 0;     /* RB0 */
+            IOCBF1 = 0;     /* RB1 */
+            break;
+        case 1:
+            IOCBF2 = 0;     /* RB2 */
+            IOCCF1 = 0;     /* RC1 */
+            break;
+        case 2:
+            IOCCF2 = 0;     /* RC2 */
+            IOCCF3 = 0;     /* RC3 */
+            break;
+        case 3:
+            IOCCF4 = 0;     /* RC4 */
+            IOCCF5 = 0;     /* RC5 */
+            break;
+        default:
+            DBG_PRINT(("Invalid coin_line %d selected.\n\r", coin_line + 1));
+            break;
+    }
 }
 
 static void coinctrl_reset(void)
 {
     uint8_t coin_line;
-
-    EXT_INT2_InterruptDisable();
-
-    /* Reset the MCP23008 I/O Expander */
-    I2C_RESET_N_SetLow();
+    uint8_t ioreg;
 
     /* Make sure all relays are off initially. */
+    INTERRUPT_GlobalInterruptLowDisable();
+
     REFUND_OFF;
     DISPOSITION_OFF;
 
     for (coin_line = 0; coin_line < COIN_LINE_MAX; coin_line++) {
-        DBG_PRINT(("Release coin line %d\n\r", coin_line));
+        DBG_PRINT(("Release coin line %d\n\r", coin_line + 1));
+        do_coin_ctrl(coin_line, FALSE);
         set_line_hold(coin_line, RELEASE);
     }
-
-    /* Take the MCP23008 I/O Expander out of reset. */
-    I2C_RESET_N_SetHigh();
-
-    /* Configure MCP23008 I/O Expander */
-    MCP23008_Write(MCP23008_GPPU, 0xFF);    /* Enable pull-ups */
-    MCP23008_Write(MCP23008_IPOL, 0xFF);    /* Invert input polarity */
-    MCP23008_Write(MCP23008_GPINTEN, 0xFF); /* Interrupt on change. */
-
-    EXT_INT2_InterruptEnable();
-}
-
-static uint8_t MCP23008_Read(uint8_t reg)
-{
-    uint8_t val = 0;
-    val = I2C1_Read1ByteRegister(MCP23008_BASE, reg);
-    return val;
-}
-
-static uint8_t MCP23008_Write(uint8_t reg, uint8_t val)
-{
-    I2C1_Write1ByteRegister(MCP23008_BASE, reg, val);
-    return 0;
+    delay_ms(100);
+    IOCBF = 0;
+    IOCCF = 0;
+    INTERRUPT_GlobalInterruptLowEnable();
 }

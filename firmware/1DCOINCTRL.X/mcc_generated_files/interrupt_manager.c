@@ -1,11 +1,11 @@
 /**
-  Generated Interrupt Manager Source File
+  Generated Interrupt Manager Header File
 
   @Company:
     Microchip Technology Inc.
 
   @File Name:
-    interrupt_manager.c
+    interrupt_manager.h
 
   @Summary:
     This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
@@ -15,12 +15,12 @@
     For individual peripheral handlers please see the peripheral driver for
     all modules selected in the GUI.
     Generation Information :
-        Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.78.1
-        Device            :  PIC18F45K50
-        Driver Version    :  2.03
+        Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
+        Device            :  PIC18F47Q84
+        Driver Version    :  2.12
     The generated drivers are tested against the following:
-        Compiler          :  XC8 2.10 and above or later
-        MPLAB 	          :  MPLAB X 5.30
+        Compiler          :  XC8 2.36 and above or later
+        MPLAB 	          :  MPLAB X 6.00
 */
 
 /*
@@ -51,45 +51,33 @@
 
 void  INTERRUPT_Initialize (void)
 {
-    // Disable Interrupt Priority Vectors (16CXXX Compatibility Mode)
-    RCONbits.IPEN = 0;
+    INTCON0bits.IPEN = 1;
+
+    bool state = (unsigned char)GIE;
+    GIE = 0;
+    IVTLOCK = 0x55;
+    IVTLOCK = 0xAA;
+    IVTLOCKbits.IVTLOCKED = 0x00; // unlock IVT
+
+    IVTBASEU = 0;
+    IVTBASEH = 0;
+    IVTBASEL = 8;
+
+    IVTLOCK = 0x55;
+    IVTLOCK = 0xAA;
+    IVTLOCKbits.IVTLOCKED = 0x01; // lock IVT
+
+    GIE = state;
+
+    // Assign peripheral interrupt priority vectors
+    IPR0bits.IOCIP = 0;
+    IPR3bits.TMR0IP = 1;
 }
 
-void __interrupt() INTERRUPT_InterruptManager (void)
+void __interrupt(irq(default),base(8)) Default_ISR()
 {
-    // interrupt handler
-    if(INTCONbits.TMR0IE == 1 && INTCONbits.TMR0IF == 1)
-    {
-        TMR0_ISR();
-    }
-    else if(INTCON3bits.INT2IE == 1 && INTCON3bits.INT2IF == 1)
-    {
-        INT2_ISR();
-    }
-    else if(INTCONbits.PEIE == 1)
-    {
-        if(PIE3bits.USBIE == 1 && PIR3bits.USBIF == 1)
-        {
-            USB_USBDeviceTasks();
-        } 
-        else if(PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1)
-        {
-            EUSART1_RxDefaultInterruptHandler();
-        } 
-        else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)
-        {
-            EUSART1_TxDefaultInterruptHandler();
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
-    else
-    {
-        //Unhandled Interrupt
-    }
 }
+
 /**
  End of File
 */
