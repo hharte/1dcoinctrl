@@ -1,3 +1,4 @@
 (sym_lib_table
-  (lib (name 1d_coinctrl_r2-rescue)(type Legacy)(uri ${KIPRJMOD}/1d_coinctrl_r2-rescue.lib)(options "")(descr ""))
+  (lib (name "1d_coinctrl_r2-rescue")(type "Legacy")(uri "${KIPRJMOD}/1d_coinctrl_r2-rescue.lib")(options "")(descr ""))
+  (lib (name "TBP01R1-508-04BE")(type "Legacy")(uri "${KIPRJMOD}/TBP01R1-508-04BE.lib")(options "")(descr ""))
 )

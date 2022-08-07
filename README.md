@@ -76,7 +76,7 @@ All coin line signaling happens with respect to TIP and Ground with the RING ope
 
 ## Controlling the Coin Line Signaling
 
-Control of the coin lines is handled by a PIC18F45K50 microcontroller.  This microcontroller can sense the line ON/OFF hook status, the test status, and can control the relays on the controller.
+Control of the coin lines is handled by a PIC18F47Q84 microcontroller.  This microcontroller can sense the line polarity and ON/OFF hook status, the test status, and can control the relays on the controller.
 
 There are three relays that provide common control, and two additional relays per line.
 
@@ -87,7 +87,7 @@ There are three relays that provide common control, and two additional relays pe
 
 2. **_DISPOSITION_** Relay: When operated will prepare high voltage (either +130VDC or -130VDC, depending on the state of the REFUND relay) to be applied to the TIP when the selected line's COIN_CONTROL relay is operated.  When the DISPOSITION relay is not operated, low voltage (+25VDC or -25VDC) will be applied in order to perform either the initial rate test or the stuck coin test.
 
-3. **_POLARITY_** Relay: This relay is used to swap the Vout+ and Vout- on the output of the 130VDC DC-DC converter so that both +130VDC and -130VDC are available depending on whether the coin should be collected or refunded.
+3. **_POLE-CHANGER_** Relay: This relay is used to swap the Vout+ and Vout- on the output of the 130VDC DC-DC converter so that both +130VDC and -130VDC are available depending on whether the coin should be collected or refunded.
 
 
 ### Per-Line Relays (one each per coin line:)
@@ -103,7 +103,7 @@ There are several opto-isolated sensors in the design to provide status to the m
 
 1. **_TEST_STATUS_** sensor will go low when current is flowing during a test.  It will be high when current is not flowing.
 
-2. Per-line **_OFF_HOOK_** sensors (one per line) will go low when current is flowing through the loop to the CO (Asterisk PBX.)  This current will be flowing either when the payphone is off-hook or when the line is on hold.
+2. Per-line **_OFF_HOOK_F and OFF_HOOK_R_** sensors (one per line) will go low when current is flowing through the loop to the CO (Asterisk PBX) and can detect forward and reverse polarity.  This current will be flowing either when the payphone is off-hook or when the line is on hold.
 
 
 # Microcontroller Firmware
@@ -263,121 +263,27 @@ Commands are as follows:
 
 ## Assembly
 
-To reduce cost, the PCB can be assembled to support fewer than four pay phones.  If only one pay phone is desired, U5 (7406) can be omitted, as well as components associated with lines 2 through 4.
-
-If you have another source of +/- 130VDC, connect +/-130VDC directly to J7 and omit PS1.
+To reduce cost, the PCB can be assembled to support fewer than four pay phones.  If only one pay phone is desired, U3 (7406) can be omitted, as well as components associated with lines 2 through 4.
 
 
-## Issue 2 PCB Errata
+## Issue 3 PCB - Note this PCB has not been fabricated/tested yet!
 
 
 ### Microcontroller Upgrade
 
-I decided to upgrade the microcontroller from a PIC18F4550 to the newer PIC18F47Q84, which is largely pin compatible with the original part.  The PIC18F47Q84 does not support USB, so that portion of the circuit can be omitted during assembly:
-
-**Do not populate:** C8, C21, J10, JP1, R18
+The PIC microcontroller was upgraded from a PIC18F45K50 to the newer PIC18F47Q84, which is largely pin compatible with the original part.  The PIC18F47Q84 does not support USB, so an optional FTDI USB UART header is provided, for those who do not wish to use RS-232.
 
 
-### Removal of the MCP23008 i<sup>2</sup>c I/O Expander
-
-To simplify the hardware and firmware in preparation for another PCB revision, I decided to remove the MCP23008 i<sup>2</sup>c I/O expander that handled the hook supervision.  The i<sup>2</sup>c expander saved only four I/O pins on the PIC, at the expense of complexity and cost.
-
-**Do not populate:** U1 (MCP23008.)  Instead, connect the hook state optocouplers directly to the PIC I/O pins as follows:
+### Other changes between Issue 2 and Issue 3:
 
 
-<table>
-  <tr>
-   <td><strong><em>Net</em></strong>
-   </td>
-   <td><strong><em>PIC Pin</em></strong>
-   </td>
-   <td><strong><em>Wire From</em></strong>
-   </td>
-   <td><strong><em>Wire To</em></strong>
-   </td>
-  </tr>
-  <tr>
-   <td>L1_OFF_HOOK_F
-   </td>
-   <td>RB0
-   </td>
-   <td>U1-10
-   </td>
-   <td>U1-2
-   </td>
-  </tr>
-  <tr>
-   <td>L1_OFF_HOOK_R
-   </td>
-   <td>RB1
-   </td>
-   <td>U1-11
-   </td>
-   <td>U1-1
-   </td>
-  </tr>
-  <tr>
-   <td>L2_OFF_HOOK_F
-   </td>
-   <td>RB2
-   </td>
-   <td>U1-12
-   </td>
-   <td>U1-8
-   </td>
-  </tr>
-  <tr>
-   <td>L2_OFF_HOOK_R
-   </td>
-   <td>RC1
-   </td>
-   <td>U1-13
-   </td>
-   <td>J8-18
-   </td>
-  </tr>
-  <tr>
-   <td>L3_OFF_HOOK_F
-   </td>
-   <td>RC2
-   </td>
-   <td>U1-14
-   </td>
-   <td>J8-17
-   </td>
-  </tr>
-  <tr>
-   <td>L3_OFF_HOOK_R
-   </td>
-   <td>RC3
-   </td>
-   <td>U1-15
-   </td>
-   <td>U3-18 (make sure C8 is not populated)
-   </td>
-  </tr>
-  <tr>
-   <td>L4_OFF_HOOK_F
-   </td>
-   <td>RC4
-   </td>
-   <td>U1-16
-   </td>
-   <td>J10-2 (USB D-)
-   </td>
-  </tr>
-  <tr>
-   <td>L4_OFF_HOOK_R
-   </td>
-   <td>RC5
-   </td>
-   <td>U1-17
-   </td>
-   <td>J10-3 (USB D+)
-   </td>
-  </tr>
-</table>
 
+* Remove barrel jack, replace with 4-position terminal block with provision for +/- 130VDC input in case the user already has an appropriate power supply and does not want the on-board DC-DC converter.  Note: 130V DC-DC converter PS2, relay K8, C14, D10, and R16 must be omitted during assembly.
+* Added bi-color LEDs for line status.
+    * Green=Off-hook, normal polarity.
+    * Red=Off-hook, reverse polarity.
+    * Off=on-hook.
+* Add header for FTDI USB UART, if user does not need RS-232 UART levels.  To use the FTDI header, do not populate U1 and other components on pp. 3 of the schematic.
 
 
 # Asterisk PBX Modifications
