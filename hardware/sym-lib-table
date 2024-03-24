@@ -1,4 +1,6 @@
 (sym_lib_table
-  (lib (name "1d_coinctrl_r2-rescue")(type "Legacy")(uri "${KIPRJMOD}/1d_coinctrl_r2-rescue.lib")(options "")(descr ""))
+  (version 7)
+  (lib (name "1d_coinctrl_r2-rescue")(type "KiCad")(uri "${KIPRJMOD}/1d_coinctrl_r2-rescue.kicad_sym")(options "")(descr ""))
   (lib (name "TBP01R1-508-04BE")(type "Legacy")(uri "${KIPRJMOD}/TBP01R1-508-04BE.lib")(options "")(descr ""))
+  (lib (name "AVR128DA28")(type "KiCad")(uri "C:/Users/hharte/source/repos/we755a_dtmf/hardware/AVR128DA28.kicad_sym")(options "")(descr ""))
 )

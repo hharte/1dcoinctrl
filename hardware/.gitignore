@@ -1,2 +1,5 @@
 *-bak
+*.bak
 *-backups/
+*.lck
+fp-info-cache
